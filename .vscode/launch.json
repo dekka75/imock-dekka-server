@@ -25,13 +25,13 @@
             "name": "Attacher",
             "type": "node",
             "request": "attach",
-            "port": 8091,
+            "port": 8081,
             "address": "192.168.56.102",
             "restart": false,
             "sourceMaps": false,
             "outDir": null,
             "localRoot": "${workspaceRoot}",
-            "remoteRoot": "/opt/dekka/imock/server/"
+            "remoteRoot": "/opt/node/"
         },
         {
             "name": "Attacher au processus",
