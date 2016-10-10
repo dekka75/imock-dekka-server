@@ -1,9 +1,9 @@
-// DESCRIPTION:    Services virtuels SOAP & Rest
+// DESCRIPTION:    Virtual services REST & SOAP
 // MAINTAINER:     Didier Kimès <didier.kimes@gmail.com>
 // TO_RUN:         /home/nodejs/nodejs DEBUG=mock:* npm start
 // TO_DEBUG:       console.log(trace.inspect(response, {depth: 1, showHidden: false}))
 
-var debug = require('debug')('imock:app')
+var debug = require('debug')('imock:server:app')
 var express = require('express')
 var redis = require('redis')
 var bunyan = require('bunyan')
@@ -16,8 +16,9 @@ var xmlParser = require('express-xml-bodyparser')
 debug('process.env.NODE_ENV: ' + process.env.NODE_ENV)
 
 var app = express()
-var datasets = require('./datasets/init')
+var datasets = require('./api/datasets')
 var routes = require('./routes/imock')
+var api = require('./api/service')
 
 // Redis access
 app.locals.redis = redis.createClient('6379', 'redis')
@@ -51,11 +52,15 @@ app.use(xmlParser({
 app.use(express.static(path.join(__dirname, 'public')))
 
 // Init data sets
-app.use('/datasets/init', datasets)
+if (app.get('env') !== 'production') {
+	app.use('/api/datasets', datasets)
+}
+// api
+app.use('/api', api)
 // No service found
 app.use('/imock/TST/TST/noservice', routes)
-// ENV - IN - OUT - Service
-app.use(/\/[A-Z-a-z-0-9]{3,}\/[A-Z-0-9]{3,4}\/[A-Z-a-z-0-9]{3,}\/.*/, routes)
+// Version - InBound - OutBound - Service
+app.use(/\/[A-Z-a-z-0-9]{3,}\/[A-Z-a-z-0-9]{3,}\/[A-Z-a-z-0-9]{3,}\/.*/, routes)
 
 // Catch 404 and forward to error handler
 app.use(function (req, res, next) {
@@ -67,7 +72,7 @@ app.use(function (req, res, next) {
 // Error handlers
 
 // Development error handler - will print stacktrace
-if (app.get('env') === 'development') {
+if (app.get('env') !== 'production') {
 	app.use(function (err, req, res, next) {
 		debug('404 Not found...')
 		res.status(err.status || 500)
