@@ -1,0 +1,192 @@
+swagger: "2.0"
+info:
+  version: "0.0.1"
+  title: "API iMock"
+  license:
+    name: MIT
+host: 192.168.56.102:8080
+basePath: "/api"
+schemes:
+  - http
+produces:
+  - application/json
+consumes:
+  - application/json
+paths:
+  /services/{campaign}:
+    post:
+      description: "Create a vitual service"
+      parameters:
+        - name: campaign
+          in: path
+          required: true
+          description: "Name of campaign"
+          type: string
+          default: "mock-v0.0.1"
+        - name: data
+          in: body
+          description: "Service payload"
+          required: true
+          schema:
+           "$ref": "#/definitions/service"
+      responses:
+        200:
+          description: "Service create"
+          schema:
+           "$ref": "#/definitions/messages"
+        500:
+          description: "Service not create"
+          schema:
+           "$ref": "#/definitions/messages"
+  /services/{group}/{campaign}:
+    get:
+      description: "List of services"
+      parameters:
+        - name: group
+          in: path
+          required: true
+          description: "Name of group"
+          type: string
+          default: "imock"      
+        - name: campaign
+          in: path
+          required: true
+          description: "Name of campaign"
+          type: string
+          default: "mock"      
+      responses:
+        200:
+          description: "List of services"
+          schema:
+           "$ref": "#/definitions/services"
+        404:
+          description: "Empty list"
+          schema:
+           "$ref": "#/definitions/messages"
+        500:
+          description: "Error"
+          schema:
+           "$ref": "#/definitions/messages"
+  /groups:
+    get:
+      description: "List of groups"
+      responses:
+        200:
+          description: "List of groups"
+          schema:
+           "$ref": "#/definitions/groups"
+        404:
+          description: "Empty list"
+          schema:
+           "$ref": "#/definitions/messages"
+        500:
+          description: "Error"
+          schema:
+           "$ref": "#/definitions/messages"
+  /campaigns/{group}:
+    get:
+      description: "List of campaigns"
+      parameters:
+        - name: group
+          in: path
+          required: true
+          description: "Name of group"
+          type: string
+          default: "imock"      
+      responses:
+        200:
+          description: "List of campaigns"
+          schema:
+           "$ref": "#/definitions/campaigns"
+        404:
+          description: "Empty list"
+          schema:
+           "$ref": "#/definitions/messages"
+        500:
+          description: "Error"
+          schema:
+           "$ref": "#/definitions/messages"
+
+definitions:
+  service:
+    type: object
+    properties:
+      name:
+        description: "Path of service"
+        type: string
+        default: "\/INBound/OUTBound/REST_POST"
+      designation:
+        description: "Name of virtual service"
+        type: string
+        default: "imock unit tests"
+      group:
+        description: "Name of group"
+        type: string
+        default: "imock"
+      attribut:
+        description: "Key use to search response"
+        type: string
+        default: "id"
+      contentType:
+        description: "Response content-type"
+        type: string
+        default: "application/json; charset=UTF-8"
+      status:
+        description: "Response status"
+        type: integer
+        default: 200
+      response:
+        description: "Response default"
+        type: string
+        default: '{"data":{"id":0,"first_name":"foo","last_name":"bar","Label":""}}'
+      real:
+        description: "Activate proxy mode"
+        type: integer
+        default: 0
+      producer:
+        description: "Adsress of real service"
+        type: string
+        default: ""
+      min:
+        description: "Use to calculate time of response"
+        type: integer
+        format: int64
+        default: 100
+      max:
+        description: "Use to calculate time of response"
+        type: integer
+        format: int64
+        default: 200
+  groups:
+    type: object
+    properties:
+      group:
+        description: "Group name"
+        type: array
+        items:
+          type: string
+  campaigns:
+    type: object
+    properties:
+      campaign:
+        description: "Campaign name"
+        type: array
+        items:
+          type: string
+  services:
+    type: object
+    properties:
+      campaign:
+        description: "Service name"
+        type: array
+        items:
+          type: string
+  messages:
+    type: object
+    properties:
+      code:
+        description: "Code of message or error"
+        type: string
+      message:
+        description: "Message or error"
+        type: string

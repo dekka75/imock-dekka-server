@@ -1,6 +1,8 @@
 // DESCRIPTION:    Virtual services REST & SOAP
 // MAINTAINER:     Didier Kimès <didier.kimes@gmail.com>
 
+'use strict'
+
 var trace = require('util')
 var debug = require('debug')('imock:server:router')
 var express = require('express')
@@ -12,12 +14,14 @@ var util = require('../util')
 var router = express.Router()
 var beginAt
 
-// All Method (POST, GET, PUT, DEL, ...)
+// All Methods (POST, GET, PUT, DELETE, ...)
 router.all('/', function (req, res, next) {
     // Begin at
     beginAt = new Date().getTime()
+
     // Redis
     var client = req.app.locals.redis
+
     // Search service informations
     client.hgetall(req.baseUrl, function (err, service) {
         if (service != null && service !== undefined) {
@@ -26,6 +30,7 @@ router.all('/', function (req, res, next) {
                 // Real services
                 var uri = service.producers + req.originalUrl.match(/\/[A-Z-a-z-0-9]{3,}(\/.*)/)[1] // Without Version
                 var headers = req.headers
+
                 // Basic Authentification
                 if (service.auth != null && service.auth !== undefined && req.get('Authorization') === undefined) {
                     var auth = "Basic " + new Buffer(service.auth).toString("base64")
@@ -36,10 +41,11 @@ router.all('/', function (req, res, next) {
                     uri: uri,
                     method: req.method,
                     headers: headers,
-                    timeout: 180000, // 3 * 60 * 1000
+                    timeout: 180000, // Time out : 3 * 60 * 1000
                     followRedirect: true
                 }
-                // JSON or XML
+
+                // Convert to json or xml
                 if (req.method == 'POST') {
                     if (/application\/json/.test(req.get('content-type'))) {
                         options['body'] = JSON.stringify(req.body)
@@ -47,7 +53,7 @@ router.all('/', function (req, res, next) {
                         options['body'] = req.rawBody
                     }
                 }
-                // Call Service Real
+                // Call real service
                 request(options, function (err, response, body) {
                     if (err) {
                         sendBody('real', req, res, service, '{"code": "ERROR","description": "Connection error"}', 'No response from producers')
@@ -66,42 +72,48 @@ router.all('/', function (req, res, next) {
                 var hash = service.name
                 var min = parseInt(service.min, 10)
                 var max = parseInt(service.max, 10)
-                var tdr
+                    // Calculate response time
+                var tdr = Math.floor(parseInt(min) + (Math.random() * (max - min)))
 
-                // Hash for find response
+                // Hash to find response
                 for (var key in service) {
-                    if (key.indexOf('key') != -1) {
+                    if (key.indexOf('attribut') != -1) {
                         hash += getKeyValue(req, service[key])
                     }
                 }
+                // No response, return default
                 if (service.name === hash) {
                     // Return default response
-                    bs = service.body
-                    tdr = Math.floor(parseInt(min) + (Math.random() * (max - min)))
-                    sleep(tdr, bs, function (body) {
+                    sleep(tdr, service.body, function (body) {
                         sendBody('mock', req, res, service, body)
                     })
                 } else {
                     // Search response
                     client.hgetall(hash, function (err, response) {
                         if (response != null && response !== undefined) {
-                            br = response.body
-                            tdr = Math.floor(parseInt(min) + (Math.random() * (max - min)))
-                            sleep(tdr, br, function (body) {
+                            sleep(tdr, response.body, function (body) {
                                 sendBody('mock', req, res, service, body)
                             })
                         } else {
-                            sendBody('mock', req, res, service, '{"code": "ERROR","description": "Not response found"}', 'Not response found: ' + hash)
+                            sendBody('mock', req, res, service, '{"code": "ERROR","description": "Response not found"}', 'Response not found: ' + hash)
                         }
                     })
                 }
             }
         } else {
-            sendBody('mock', req, res, service, '{"code": "ERROR","description": "Not service found"}', 'Not service found: ' + req.baseUrl)
+            sendBody('mock', req, res, service, '{"code": "ERROR","description": "Service not found"}', 'Service not found: ' + req.baseUrl)
         }
     })
 })
 
+/**
+ * 
+ * Retrieve value of attribut in request 
+ * 
+ * @param {Object} req
+ * @param {string} key
+ * @returns {string}
+ */
 function getKeyValue(req, key) {
     // TODO: check key or replace eval by req.body[property]
     if (key != null && key != undefined) {
@@ -117,6 +129,7 @@ function getKeyValue(req, key) {
                 val = eval('req.query.' + key)
             }
             if (val) {
+                // String or object             
                 if (val === val.toString() && val.indexOf(":") != -1) {
                     var kv = val.split(":")
                     val = kv[1]
@@ -130,6 +143,14 @@ function getKeyValue(req, key) {
     return ''
 }
 
+/**
+ * 
+ * Renderer body and simulate response of service
+ * 
+ * @param {number} tdr
+ * @param {string} body
+ * @param {function} done
+ */
 function sleep(tdr, body, done) {
     // Render response
     var render = body
@@ -139,11 +160,22 @@ function sleep(tdr, body, done) {
         render = render.replace(/<!([^!>]+)!>/, new randexp(coolstring[1]).gen())
     }
     while (new Date().getTime() < beginAt + tdr) {
-        // Nothing todo
+        // Simulate response of service
     }
     done(render)
 }
 
+/**
+ * 
+ * Return response to consumers
+ * 
+ * @param {string} mode
+ * @param {Object} req
+ * @param {Object} res
+ * @param {Object} service
+ * @param {string} body
+ * @param {string} mess
+ */
 function sendBody(mode, req, res, service, body, mess) {
     if (mode === 'mock') {
         // TODO: Don't take content-type from request 
@@ -154,6 +186,8 @@ function sendBody(mode, req, res, service, body, mess) {
         }
         res.set('X-Powered-By', 'Intelligent Mock <!/^.*$/!>')
         res.set('Cache-Control', 'public, max-age=0')
+
+        // TODO: Don't take status from request 
         if (mess != null && mess !== undefined) {
             res.status(500)
         } else {
@@ -169,6 +203,7 @@ function sendBody(mode, req, res, service, body, mess) {
     }
     // Redis
     var client = req.app.locals.redis
+
     // Bunyan
     var traffic = req.app.locals.traffic
 
@@ -182,6 +217,21 @@ function sendBody(mode, req, res, service, body, mess) {
     traffic.info(rrp, 'traffic')
 }
 
+/**
+ * 
+ * Generate json object request response pair
+ * 
+ * a) Use for view rest or soap exchange
+ * b) Use for log rest or soap exchange
+ * 
+ * @param {string} mode
+ * @param {Date} beginAt
+ * @param {Object} req
+ * @param {Object} res
+ * @param {Object} service
+ * @param {Object} resBody
+ * @returns {Object}
+ */
 function getRequestResponsePair(mode, beginAt, req, res, service, resBody) {
     var endAt = new Date().getTime()
     var duration = endAt - beginAt

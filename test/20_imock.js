@@ -20,7 +20,8 @@ describe(
 
 		// Initialize data sets to call mock service
 		describe(
-			"20 - Init data sets", function () {
+			"20 - Init data sets",
+			function () {
 				var request = '/api/datasets'
 				before(function (done) {
 					chai.request(server).get(request).set('content-type', 'application/json; charset=UTF-8').end(
@@ -41,7 +42,7 @@ describe(
 		describe(
 			"21 - Call Rest service by GET method id=1",
 			function () {
-				var request = '/imock/INBound/OUTBound/REST_GET?id=1'
+				var request = '/mock/INBound/OUTBound/REST_GET?id=1'
 				before(function (done) {
 					chai.request(server).get(request).set('content-type', 'application/json; charset=UTF-8')
 						.end(function (err, res) {
@@ -62,7 +63,7 @@ describe(
 		describe(
 			"22 - Call Rest service by GET method id=2",
 			function () {
-				var request = '/imock/INBound/OUTBound/REST_GET?id=2'
+				var request = '/mock/INBound/OUTBound/REST_GET?id=2'
 				before(function (done) {
 					chai.request(server).get(request).set('content-type', 'application/json; charset=UTF-8')
 						.end(function (err, res) {
@@ -83,14 +84,14 @@ describe(
 		describe(
 			"23 - Call Rest service by POST method id=3",
 			function () {
-				var url = '/imock/INBound/OUTBound/REST_POST'
+				var url = '/mock/INBound/OUTBound/REST_POST'
 				var body = '{"credentials":{"id":3}}'
 				before(function (done) {
 					chai.request(server).post(url).set('content-type', 'application/json; charset=UTF-8').send(
 						body).end(function (err, res) {
-							response = res
-							done()
-						})
+						response = res
+						done()
+					})
 				})
 				it('json response valid', function () {
 					response.should.be.ok
@@ -105,14 +106,14 @@ describe(
 		describe(
 			"24 - Call Rest service by POST method id=4",
 			function () {
-				var url = '/imock/INBound/OUTBound/REST_POST'
+				var url = '/mock/INBound/OUTBound/REST_POST'
 				var body = '{"credentials":{"id":4}}'
 				before(function (done) {
 					chai.request(server).post(url).set('content-type', 'application/json; charset=UTF-8').send(
 						body).end(function (err, res) {
-							response = res
-							done()
-						})
+						response = res
+						done()
+					})
 				})
 				it('json response valid', function () {
 					response.should.be.ok
@@ -127,7 +128,7 @@ describe(
 		describe(
 			"25 - Call SOAP service id=5",
 			function () {
-				var url = '/imock/INBound/OUTBound/SOAP'
+				var url = '/mock/INBound/OUTBound/SOAP'
 				var body = '<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:v2="http://www.orange.com/rbq/g3/soap/v2"><soapenv:Header/><soapenv:Body><v2:SOAP><credential><id>5</id></credential></v2:SOAP></soapenv:Body></soapenv:Envelope>'
 				before(function (done) {
 					chai.request(server).post(url).set('content-type', 'text/xml; charset=UTF-8').send(body)
@@ -148,7 +149,7 @@ describe(
 		describe(
 			"26 - Call SOAP service id=6",
 			function () {
-				var url = '/imock/INBound/OUTBound/SOAP'
+				var url = '/mock/INBound/OUTBound/SOAP'
 				var body = '<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:v2="http://www.orange.com/rbq/g3/soap/v2"><soapenv:Header/><soapenv:Body><v2:SOAP><credential><id>6</id></credential></v2:SOAP></soapenv:Body></soapenv:Envelope>'
 				before(function (done) {
 					chai.request(server).post(url).set('content-type', 'text/xml; charset=UTF-8').send(body)
@@ -167,8 +168,9 @@ describe(
 
 		// 404
 		describe(
-			"27 - Route does not exist", function () {
-				var request = '/imock/404'
+			"27 - Route does not exist",
+			function () {
+				var request = '/mock/404'
 				before(function (done) {
 					chai.request(server).get(request).end(function (err, res) {
 						response = res
@@ -183,8 +185,9 @@ describe(
 
 		// 500 - Service does not exist
 		describe(
-			"28 - Service does not exist", function () {
-				var request = '/imock/INBound/OUTBound/noservice'
+			"28 - Service does not exist",
+			function () {
+				var request = '/mock/INBound/OUTBound/noservice'
 				before(function (done) {
 					chai.request(server).get(request).set('content-type', 'application/json; charset=UTF-8').end(
 						function (err, res) {
@@ -203,7 +206,7 @@ describe(
 		describe(
 			"29 - Response does not exist",
 			function () {
-				var request = '/imock/INBound/OUTBound/GET_REST_01?id=7'
+				var request = '/mock/INBound/OUTBound/GET_REST_01?id=999'
 				before(function (done) {
 					chai.request(server).get(request).set('content-type', 'application/json; charset=UTF-8')
 						.end(function (err, res) {
