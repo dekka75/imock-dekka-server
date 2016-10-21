@@ -57,7 +57,7 @@ app.use(xmlParser({
 app.use(express.static(path.join(__dirname, 'public')))
 
 // Init data sets
-if (app.get('env') !== 'production') {
+if (app.get('env') != 'production') {
     app.use('/api/datasets', datasets)
 }
 // api
@@ -79,7 +79,7 @@ app.use(function (req, res, next) {
 // Error handlers
 
 // Development error handler - will print stacktrace
-if (app.get('env') !== 'production') {
+if (app.get('env') != 'production') {
     app.use(function (err, req, res, next) {
         debug('404 Not found...')
         res.status(err.status || 500)

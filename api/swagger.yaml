@@ -22,20 +22,48 @@ paths:
           required: true
           description: "Name of campaign"
           type: string
-          default: "mock-v0.0.1"
+          default: "mock"
         - name: data
           in: body
           description: "Service payload"
           required: true
           schema:
-           "$ref": "#/definitions/service"
+           "$ref": "#/definitions/create"
       responses:
         200:
           description: "Service create"
           schema:
            "$ref": "#/definitions/messages"
         500:
-          description: "Service not create"
+          description: "Error system"
+          schema:
+           "$ref": "#/definitions/messages"
+    delete:
+      description: "Delete a vitual service"
+      parameters:
+        - name: campaign
+          in: path
+          required: true
+          description: "Name of campaign"
+          type: string
+          default: "mock"
+        - name: data
+          in: body
+          description: "Service payload"
+          required: true
+          schema:
+           "$ref": "#/definitions/delete"
+      responses:
+        200:
+          description: "Service create"
+          schema:
+           "$ref": "#/definitions/messages"
+        404:
+          description: "Empty list"
+          schema:
+           "$ref": "#/definitions/messages"
+        500:
+          description: "Error system"
           schema:
            "$ref": "#/definitions/messages"
   /services/{group}/{campaign}:
@@ -64,7 +92,7 @@ paths:
           schema:
            "$ref": "#/definitions/messages"
         500:
-          description: "Error"
+          description: "Error system"
           schema:
            "$ref": "#/definitions/messages"
   /groups:
@@ -80,7 +108,7 @@ paths:
           schema:
            "$ref": "#/definitions/messages"
         500:
-          description: "Error"
+          description: "Error system"
           schema:
            "$ref": "#/definitions/messages"
   /campaigns/{group}:
@@ -103,12 +131,12 @@ paths:
           schema:
            "$ref": "#/definitions/messages"
         500:
-          description: "Error"
+          description: "Error system"
           schema:
            "$ref": "#/definitions/messages"
 
 definitions:
-  service:
+  create:
     type: object
     properties:
       name:
@@ -157,6 +185,17 @@ definitions:
         type: integer
         format: int64
         default: 200
+  delete:
+    type: object
+    properties:
+      name:
+        description: "Path of service"
+        type: string
+        default: "\/INBound/OUTBound/REST_POST"
+      group:
+        description: "Name of group"
+        type: string
+        default: "imock"
   groups:
     type: object
     properties:

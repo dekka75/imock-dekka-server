@@ -16,7 +16,6 @@ router.get('/', function (req, res, next) {
     // Sort in ascending order
     client.sort('/api/groups', 'ALPHA', function (err, list) {
         if (err) {
-            debug(err)
             sendBody(req, res, 500, '{"code": "ECHEC", "message": "List not found"}')
         } else {
             if (list.length > 0) {
@@ -39,7 +38,7 @@ router.get('/', function (req, res, next) {
  */
 function sendBody(req, res, status, body) {
     // Headers
-    if (req.app.get('env') !== 'production') {
+    if (req.app.get('env') != 'production') {
         res.set('Access-Control-Allow-Origin', '*')
     }
     res.set('X-Powered-By', 'Intelligent Mock <!/^.*$/!>')

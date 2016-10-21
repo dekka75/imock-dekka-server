@@ -24,15 +24,15 @@ router.all('/', function (req, res, next) {
 
     // Search service informations
     client.hgetall(req.baseUrl, function (err, service) {
-        if (service != null && service !== undefined) {
+        if (service != null && service != undefined) {
             var real = parseInt(service.real, 10)
-            if (real === 1) {
+            if (real == 1) {
                 // Real services
-                var uri = service.producers + req.originalUrl.match(/\/[A-Z-a-z-0-9]{3,}(\/.*)/)[1] // Without Version
+                var uri = service.producer + req.originalUrl.match(/\/[A-Z-a-z-0-9]{3,}(\/.*)/)[1] // Without Version
                 var headers = req.headers
 
                 // Basic Authentification
-                if (service.auth != null && service.auth !== undefined && req.get('Authorization') === undefined) {
+                if (service.auth != null && service.auth != undefined && req.get('Authorization') == undefined) {
                     var auth = "Basic " + new Buffer(service.auth).toString("base64")
                     headers["Authorization"] = auth
                 }
@@ -56,7 +56,7 @@ router.all('/', function (req, res, next) {
                 // Call real service
                 request(options, function (err, response, body) {
                     if (err) {
-                        sendBody('real', req, res, service, '{"code": "ERROR","description": "Connection error"}', 'No response from producers')
+                        sendBody('real', req, res, service, '{"code": "ERROR","description": "Connection error"}', 'No response from producer')
                     } else {
                         var headers = response.headers
                         delete headers['Content-Length']
@@ -82,16 +82,16 @@ router.all('/', function (req, res, next) {
                     }
                 }
                 // No response, return default
-                if (service.name === hash) {
+                if (service.name == hash) {
                     // Return default response
-                    sleep(tdr, service.body, function (body) {
+                    sleep(tdr, service.response, function (body) {
                         sendBody('mock', req, res, service, body)
                     })
                 } else {
                     // Search response
-                    client.hgetall(hash, function (err, response) {
-                        if (response != null && response !== undefined) {
-                            sleep(tdr, response.body, function (body) {
+                    client.hgetall(hash, function (err, service) {
+                        if (service != null && service != undefined) {
+                            sleep(tdr, service.response, function (body) {
                                 sendBody('mock', req, res, service, body)
                             })
                         } else {
@@ -130,7 +130,7 @@ function getKeyValue(req, key) {
             }
             if (val) {
                 // String or object             
-                if (val === val.toString() && val.indexOf(":") != -1) {
+                if (val == val.toString() && val.indexOf(":") != -1) {
                     var kv = val.split(":")
                     val = kv[1]
                 }
@@ -156,7 +156,7 @@ function sleep(tdr, body, done) {
     var render = body
     var re = /<!([^!>]+)!>/g // <!regex!>
     var coolstring
-    while ((coolstring = re.exec(body)) !== null) {
+    while ((coolstring = re.exec(body)) != null) {
         render = render.replace(/<!([^!>]+)!>/, new randexp(coolstring[1]).gen())
     }
     while (new Date().getTime() < beginAt + tdr) {
@@ -177,7 +177,7 @@ function sleep(tdr, body, done) {
  * @param {string} mess
  */
 function sendBody(mode, req, res, service, body, mess) {
-    if (mode === 'mock') {
+    if (mode == 'mock') {
         // TODO: Don't take content-type from request 
         if (/application\/json/.test(req.get('content-type'))) {
             res.set('Content-Type', 'application/json; charset=UTF-8')
@@ -188,12 +188,12 @@ function sendBody(mode, req, res, service, body, mess) {
         res.set('Cache-Control', 'public, max-age=0')
 
         // TODO: Don't take status from request 
-        if (mess != null && mess !== undefined) {
+        if (mess != null && mess != undefined) {
             res.status(500)
         } else {
             res.status(200)
         }
-    } else if (mode === 'real' && mess != null && mess !== undefined) {
+    } else if (mode == 'real' && mess != null && mess != undefined) {
         res.set('Content-Type', 'application/json; charset=UTF-8')
     }
     // Send response
@@ -240,15 +240,15 @@ function getRequestResponsePair(mode, beginAt, req, res, service, resBody) {
     var uid = 'rrp-' + Math.floor(Math.random() * 10) + parseInt(beginAt).toString(36).toUpperCase()
     var name = '/' + env + '/NoServiceFound/' + uid
     var consumers = req.get('host').match('/^https?:/\/\/') ? req.get('host') : 'http://' + req.get('host')
-    var producers = ''
+    var producer = ''
     var reqBody = ''
-    if (service != null && service !== undefined) {
+    if (service != null && service != undefined) {
         name = service.name + '/' + uid
-        if (service.producers != null && service.producers !== undefined) {
-            producers = service.producers
+        if (service.producer != null && service.producer != undefined) {
+            producer = service.producer
         }
     }
-    if (JSON.stringify(req.body) !== '{}') {
+    if (JSON.stringify(req.body) != '{}') {
         if (/application\/json/.test(req.get('content-type'))) {
             reqBody = JSON.stringify(req.body)
         } else {
@@ -263,7 +263,7 @@ function getRequestResponsePair(mode, beginAt, req, res, service, resBody) {
         stop: endAt.toString(),
         mode: mode,
         consumers: consumers,
-        producers: producers,
+        producer: producer,
         method: req.method,
         status: res.statusCode,
         url: url,
