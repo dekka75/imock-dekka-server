@@ -16,11 +16,11 @@ var xmlParser = require('express-xml-bodyparser')
 debug('process.env.NODE_ENV: ' + process.env.NODE_ENV)
 
 var app = express()
-var datasets = require('./api/datasets')
-var routes = require('./routes/imock')
-var services = require('./api/services')
 var groups = require('./api/groups')
 var campaigns = require('./api/campaigns')
+var services = require('./api/services')
+var responses = require('./api/responses')
+var routes = require('./routes/imock')
 
 // Redis access
 app.locals.redis = redis.createClient('6379', 'redis')
@@ -56,15 +56,11 @@ app.use(xmlParser({
 }))
 app.use(express.static(path.join(__dirname, 'public')))
 
-// Init data sets
-if (app.get('env') != 'production') {
-    app.use('/api/datasets', datasets)
-}
 // api
-app.use(/\/api\/services\/.*/, services)
-app.use(/\/api\/services\/.*\/.*/, services)
 app.use(/\/api\/groups/, groups)
 app.use(/\/api\/campaigns\/.*/, campaigns)
+app.use(/\/api\/services?\/.*/, services)
+app.use(/\/api\/responses?\/.*/, responses)
 
 // Campaign - InBound - OutBound - Service
 app.use(/\/[A-Z-a-z-0-9]{3,}\/[A-Z-a-z-0-9]{3,}\/[A-Z-a-z-0-9]{3,}\/.*/, routes)

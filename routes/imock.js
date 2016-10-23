@@ -28,7 +28,7 @@ router.all('/', function (req, res, next) {
             var real = parseInt(service.real, 10)
             if (real == 1) {
                 // Real services
-                var uri = service.producer + req.originalUrl.match(/\/[A-Z-a-z-0-9]{3,}(\/.*)/)[1] // Without Version
+                var uri = service.producer + req.baseUrl.match(/\/[A-Z-a-z-0-9]{3,}(\/.*)/)[1] // Without Version
                 var headers = req.headers
 
                 // Basic Authentification

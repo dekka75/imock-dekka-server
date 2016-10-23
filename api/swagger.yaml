@@ -13,7 +13,7 @@ produces:
 consumes:
   - application/json
 paths:
-  /services/{campaign}:
+  /service/{campaign}:
     post:
       description: "Create a vitual service"
       parameters:
@@ -25,19 +25,47 @@ paths:
           default: "mock"
         - name: data
           in: body
-          description: "Service payload"
           required: true
+          description: "Payload"
           schema:
-           "$ref": "#/definitions/create"
+           "$ref": "#/definitions/Service"
       responses:
         200:
           description: "Service create"
           schema:
-           "$ref": "#/definitions/messages"
+           "$ref": "#/definitions/Message"
         500:
           description: "Error system"
           schema:
-           "$ref": "#/definitions/messages"
+           "$ref": "#/definitions/Message"
+    put:
+      description: "Update a vitual service"
+      parameters:
+        - name: campaign
+          in: path
+          required: true
+          description: "Name of campaign"
+          type: string
+          default: "mock"
+        - name: data
+          in: body
+          required: true
+          description: "Payload"
+          schema:
+           "$ref": "#/definitions/Service"
+      responses:
+        200:
+          description: "Service update"
+          schema:
+           "$ref": "#/definitions/Message"
+        404:
+          description: "Empty list"
+          schema:
+           "$ref": "#/definitions/Message"
+        500:
+          description: "Error system"
+          schema:
+           "$ref": "#/definitions/Message"
     delete:
       description: "Delete a vitual service"
       parameters:
@@ -49,33 +77,51 @@ paths:
           default: "mock"
         - name: data
           in: body
-          description: "Service payload"
           required: true
+          description: "Payload"
           schema:
-           "$ref": "#/definitions/delete"
+           "$ref": "#/definitions/ServiceSearch"
       responses:
         200:
-          description: "Service create"
+          description: "Service delete"
           schema:
-           "$ref": "#/definitions/messages"
+           "$ref": "#/definitions/Message"
         404:
           description: "Empty list"
           schema:
-           "$ref": "#/definitions/messages"
+           "$ref": "#/definitions/Message"
         500:
           description: "Error system"
           schema:
-           "$ref": "#/definitions/messages"
-  /services/{group}/{campaign}:
+           "$ref": "#/definitions/Message"
+    get:
+      description: "Retrieve informations of service"
+      parameters:
+        - name: campaign
+          in: path
+          required: true
+          description: "Name of campaign"
+          type: string
+          default: "mock"      
+        - name: path
+          in: query
+          required: true
+          description: "Path of service"
+          type: string
+          default: '{"path":"/INBound/OUTBound/REST_POST"}'
+      responses:
+        200:
+          description: "Service detail"
+          schema:
+           "$ref": "#/definitions/Service"
+        404:
+          description: "Empty list"
+          schema:
+           "$ref": "#/definitions/Message"
+  /services/{campaign}:
     get:
       description: "List of services"
       parameters:
-        - name: group
-          in: path
-          required: true
-          description: "Name of group"
-          type: string
-          default: "imock"      
         - name: campaign
           in: path
           required: true
@@ -86,15 +132,155 @@ paths:
         200:
           description: "List of services"
           schema:
-           "$ref": "#/definitions/services"
+           "$ref": "#/definitions/ServiceList"
         404:
           description: "Empty list"
           schema:
-           "$ref": "#/definitions/messages"
+           "$ref": "#/definitions/Message"
         500:
           description: "Error system"
           schema:
-           "$ref": "#/definitions/messages"
+           "$ref": "#/definitions/Message"
+  /response/{campaign}:
+    post:
+      description: "Add a response to service"
+      parameters:
+        - name: campaign
+          in: path
+          required: true
+          description: "Name of campaign"
+          type: string
+          default: "mock"
+        - name: data
+          in: body
+          required: true
+          description: "Payload"
+          schema:
+           "$ref": "#/definitions/Response"
+      responses:
+        200:
+          description: "Response create"
+          schema:
+           "$ref": "#/definitions/Message"
+        500:
+          description: "Error system"
+          schema:
+           "$ref": "#/definitions/Message"
+    put:
+      description: "Update a response"
+      parameters:
+        - name: campaign
+          in: path
+          required: true
+          description: "Name of campaign"
+          type: string
+          default: "mock"
+        - name: data
+          in: body
+          required: true
+          description: "Payload"
+          schema:
+           "$ref": "#/definitions/Response"
+      responses:
+        200:
+          description: "Response update"
+          schema:
+           "$ref": "#/definitions/Message"
+        404:
+          description: "Empty list"
+          schema:
+           "$ref": "#/definitions/Message"
+        500:
+          description: "Error system"
+          schema:
+           "$ref": "#/definitions/Message"
+    delete:
+      description: "Delete a response"
+      parameters:
+        - name: campaign
+          in: path
+          required: true
+          description: "Name of campaign"
+          type: string
+          default: "mock"
+        - name: data
+          in: body
+          required: true
+          description: "Payload"
+          schema:
+           "$ref": "#/definitions/ResponseSearch"
+      responses:
+        200:
+          description: "Response delete"
+          schema:
+           "$ref": "#/definitions/Message"
+        404:
+          description: "Empty list"
+          schema:
+           "$ref": "#/definitions/Message"
+        500:
+          description: "Error system"
+          schema:
+           "$ref": "#/definitions/Message"
+    get:
+      description: "Retrieve informations of service"
+      parameters:
+        - name: campaign
+          in: path
+          required: true
+          description: "Name of campaign"
+          type: string
+          default: "mock"      
+        - name: path
+          in: query
+          required: true
+          description: "Path of service"
+          type: string
+          default: '{"path":"/INBound/OUTBound/REST_POST"}'
+        - name: search
+          in: query
+          required: true
+          description: "Criteria"
+          type: string
+          default: '3'
+      responses:
+        200:
+          description: "Response infos"
+          schema:
+           "$ref": "#/definitions/Response"
+        404:
+          description: "Empty list"
+          schema:
+           "$ref": "#/definitions/Message"
+  /responses/{campaign}:
+    get:
+      description: "List of response "
+      parameters:
+        - name: campaign
+          in: path
+          required: true
+          description: "Name of campaign"
+          type: string
+          default: "mock"      
+        - name: path
+          in: query
+          required: true
+          description: "Path of service"
+          type: string
+          default: '{"path":"/INBound/OUTBound/SOAP"}'          
+      responses:
+        200:
+          description: "List of response"
+          schema:
+           "$ref": "#/definitions/ResponseList"
+        404:
+          description: "Empty list"
+          schema:
+           "$ref": "#/definitions/Message"
+        500:
+          description: "Error system"
+          schema:
+           "$ref": "#/definitions/Message"           
   /groups:
     get:
       description: "List of groups"
@@ -102,15 +288,15 @@ paths:
         200:
           description: "List of groups"
           schema:
-           "$ref": "#/definitions/groups"
+           "$ref": "#/definitions/GroupList"
         404:
           description: "Empty list"
           schema:
-           "$ref": "#/definitions/messages"
+           "$ref": "#/definitions/Message"
         500:
           description: "Error system"
           schema:
-           "$ref": "#/definitions/messages"
+           "$ref": "#/definitions/Message"
   /campaigns/{group}:
     get:
       description: "List of campaigns"
@@ -125,21 +311,21 @@ paths:
         200:
           description: "List of campaigns"
           schema:
-           "$ref": "#/definitions/campaigns"
+           "$ref": "#/definitions/CampaignList"
         404:
           description: "Empty list"
           schema:
-           "$ref": "#/definitions/messages"
+           "$ref": "#/definitions/Message"
         500:
           description: "Error system"
           schema:
-           "$ref": "#/definitions/messages"
+           "$ref": "#/definitions/Message"
 
 definitions:
-  create:
+  Service:
     type: object
     properties:
-      name:
+      path:
         description: "Path of service"
         type: string
         default: "\/INBound/OUTBound/REST_POST"
@@ -166,13 +352,13 @@ definitions:
       response:
         description: "Response default"
         type: string
-        default: '{"data":{"id":0,"first_name":"foo","last_name":"bar","Label":""}}'
+        default: '{"id":0,"first_name":"foo","last_name":"bar","Label":""}'
       real:
         description: "Activate proxy mode"
         type: integer
         default: 0
       producer:
-        description: "Adsress of real service"
+        description: "Address of real service"
         type: string
         default: ""
       min:
@@ -185,18 +371,48 @@ definitions:
         type: integer
         format: int64
         default: 200
-  delete:
+  ServiceSearch:
     type: object
     properties:
-      name:
+      path:
         description: "Path of service"
         type: string
         default: "\/INBound/OUTBound/REST_POST"
-      group:
-        description: "Name of group"
+  ServiceList:
+    type: object
+    properties:
+      service:
+        description: "Service name"
+        type: array
+        items:
+          type: string
+  Response:
+    type: object
+    properties:
+      path:
+        description: "Path of service"
         type: string
-        default: "imock"
-  groups:
+        default: "\/INBound/OUTBound/REST_POST/3"
+      response:
+        description: "Response"
+        type: string
+        default: '{"id":3,"first_name":"jules","last_name":"verne","Label":"HAL-<!\\d{9}!>"}'
+  ResponseSearch:
+    type: object
+    properties:
+      path:
+        description: "Path of service"
+        type: string
+        default: "\/INBound/OUTBound/REST_POST/3"
+  ResponseList:
+    type: object
+    properties:
+      response:
+        description: "Response name"
+        type: array
+        items:
+          type: string
+  GroupList:
     type: object
     properties:
       group:
@@ -204,7 +420,7 @@ definitions:
         type: array
         items:
           type: string
-  campaigns:
+  CampaignList:
     type: object
     properties:
       campaign:
@@ -212,15 +428,7 @@ definitions:
         type: array
         items:
           type: string
-  services:
-    type: object
-    properties:
-      campaign:
-        description: "Service name"
-        type: array
-        items:
-          type: string
-  messages:
+  Message:
     type: object
     properties:
       code:
