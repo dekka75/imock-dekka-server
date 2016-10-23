@@ -28,7 +28,7 @@ router.all('/', function (req, res, next) {
             var real = parseInt(service.real, 10)
             if (real == 1) {
                 // Real services
-                var uri = service.producer + req.baseUrl.match(/\/[A-Z-a-z-0-9]{3,}(\/.*)/)[1] // Without Version
+                var uri = service.producer + req.originalUrl.match(/\/[A-Z-a-z-0-9]{3,}(\/.*)/)[1] // Without Version
                 var headers = req.headers
 
                 // Basic Authentification
@@ -69,7 +69,7 @@ router.all('/', function (req, res, next) {
 
             } else {
                 // Mock service
-                var hash = service.name
+                var hash = '/' + service.campaign + service.path
                 var min = parseInt(service.min, 10)
                 var max = parseInt(service.max, 10)
                     // Calculate response time
@@ -82,7 +82,7 @@ router.all('/', function (req, res, next) {
                     }
                 }
                 // No response, return default
-                if (service.name == hash) {
+                if (service.path == hash) {
                     // Return default response
                     sleep(tdr, service.response, function (body) {
                         sendBody('mock', req, res, service, body)
@@ -128,8 +128,9 @@ function getKeyValue(req, key) {
             } else {
                 val = eval('req.query.' + key)
             }
-            if (val) {
-                // String or object             
+            if (val != null && val != undefined) {
+                // Convert to string
+                val += ''
                 if (val == val.toString() && val.indexOf(":") != -1) {
                     var kv = val.split(":")
                     val = kv[1]
@@ -211,7 +212,7 @@ function sendBody(mode, req, res, service, body, mess) {
     var rrp = getRequestResponsePair(mode, beginAt, req, res, service, body)
 
     // Save request response pair
-    client.hmset(rrp.name, rrp)
+    client.hmset(rrp.path, rrp)
 
     // Log request response pair
     traffic.info(rrp, 'traffic')
@@ -235,20 +236,21 @@ function sendBody(mode, req, res, service, body, mess) {
 function getRequestResponsePair(mode, beginAt, req, res, service, resBody) {
     var endAt = new Date().getTime()
     var duration = endAt - beginAt
-    var env = req.baseUrl.match(/\/([A-Z-a-z-0-9]{3,})\/.*/)[1]
-    var url = req.baseUrl.match(/\/[A-Z-a-z-0-9]{3,}(\/.*)/)[1]
+    var campaign = req.baseUrl.match(/\/([A-Z-a-z-0-9-_]{3,})\/.*/)[1]
+    var url = req.baseUrl.match(/\/[A-Z-a-z-0-9-_]{3,}(\/.*)/)[1]
     var uid = 'rrp-' + Math.floor(Math.random() * 10) + parseInt(beginAt).toString(36).toUpperCase()
-    var name = '/' + env + '/NoServiceFound/' + uid
+    var path = '/' + campaign + '/NoServiceFound/' + uid
     var consumers = req.get('host').match('/^https?:/\/\/') ? req.get('host') : 'http://' + req.get('host')
     var producer = ''
     var reqBody = ''
     if (service != null && service != undefined) {
-        name = service.name + '/' + uid
+        path = service.path + '/' + uid
         if (service.producer != null && service.producer != undefined) {
             producer = service.producer
         }
     }
     if (JSON.stringify(req.body) != '{}') {
+        // TODO: dont take content-type from request
         if (/application\/json/.test(req.get('content-type'))) {
             reqBody = JSON.stringify(req.body)
         } else {
@@ -257,8 +259,8 @@ function getRequestResponsePair(mode, beginAt, req, res, service, resBody) {
     }
     // Response - request pair
     var rrp = {
-        name: name,
-        env: env,
+        campaign: campaign,
+        path: path,
         start: beginAt.toString(),
         stop: endAt.toString(),
         mode: mode,

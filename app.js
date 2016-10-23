@@ -63,7 +63,7 @@ app.use(/\/api\/services?\/.*/, services)
 app.use(/\/api\/responses?\/.*/, responses)
 
 // Campaign - InBound - OutBound - Service
-app.use(/\/[A-Z-a-z-0-9]{3,}\/[A-Z-a-z-0-9]{3,}\/[A-Z-a-z-0-9]{3,}\/.*/, routes)
+app.use(/\/[A-Z-a-z-0-9-_]{3,}\/[A-Z-a-z-0-9-_]{3,}\/[A-Z-a-z-0-9-_]{3,}\/.*/, routes)
 
 // Catch 404 and forward to error handler
 app.use(function (req, res, next) {

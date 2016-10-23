@@ -217,7 +217,7 @@ describe(
                     "path": "/INBound/OUTBound/REST_POST",
                     "designation": "imock unit tests",
                     "group": "imock",
-                    "attribut": "id",
+                    "attribut": "credential.id",
                     "contentType": "application/json; charset=UTF-8",
                     "status": 200,
                     "response": '{"id":0,"first_name":"foo","last_name":"bar","Label":""}',
@@ -363,7 +363,7 @@ describe(
                 var url = '/api/response/mock'
                 var body = {
                     "path": "/INBound/OUTBound/REST_GET/1",
-                    "response": '{"id":3,"first_name":"Isaac","last_name":"Asimov","Label":"HAL-<!\\d{9}!>"}',
+                    "response": '{"id":1,"first_name":"Isaac","last_name":"Asimov","Label":"HAL-<!\\d{9}!>"}',
                 }
                 before(function (done) {
                     chai.request(server).post(url).set('content-type', 'application/json; charset=UTF-8').send(
@@ -412,7 +412,7 @@ describe(
                 var url = '/api/response/mock'
                 var body = {
                     "path": "/INBound/OUTBound/REST_POST/3",
-                    "response": '{"id":3,"first_name":"Isaac","last_name":"Asimov","Label":"HAL-<!\\d{9}!>"}',
+                    "response": '{"id":3,"first_name":"Jules","last_name":"Verne","Label":"HAL-<!\\d{9}!>"}',
                 }
                 before(function (done) {
                     chai.request(server).post(url).set('content-type', 'application/json; charset=UTF-8').send(
@@ -673,5 +673,4 @@ describe(
                     response.body.path.should.equal('/INBound/OUTBound/SOAP/6')
                 })
             })
-
     })

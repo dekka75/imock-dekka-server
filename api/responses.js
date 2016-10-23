@@ -10,7 +10,7 @@ var redis = require('redis')
 var util = require('../util')
 var router = express.Router()
 
-// Create service
+// Create response
 router.post('/', function (req, res, next) {
     var client = req.app.locals.redis
 
@@ -18,27 +18,27 @@ router.post('/', function (req, res, next) {
     var data = req.body
     var campaign = req.baseUrl.match(/\/api\/response\/(.*)/)[1]
 
-    // {name} must be not empty
+    // {path} must be not empty
     if (data.path != null && data.path !== undefined) {
-        // Create service object and store to redis database
-        var service = {
+        // Create response object and store to redis database
+        var response = {
             campaign: (campaign != null && campaign !== undefined) ? campaign : 'default',
             path: (data.path != null && data.path !== undefined) ? data.path : '/INBound/OUTBound/default/0',
             response: (data.response != null && data.response !== undefined) ? data.response : '{"code":"ECHEC","message":"No response found"}',
         }
 
-        var hash = '/' + service.campaign + service.path
+        var hash = '/' + response.campaign + response.path
 
-        client.hgetall(hash, function (err, currentService) {
-            if (currentService == null || currentService == undefined) {
+        client.hgetall(hash, function (err, currentResponse) {
+            if (currentResponse == null || currentResponse == undefined) {
                 // Retrieve path of service
-                var path = service.path.match(/(\/[A-Z-a-z-0-9-_]{3,}\/[A-Z-a-z-0-9-_]{3,}\/[A-Z-a-z-0-9-_]{3,})\/.*/)[1]
+                var path = response.path.match(/(\/[A-Z-a-z-0-9-_]{3,}\/[A-Z-a-z-0-9-_]{3,}\/[A-Z-a-z-0-9-_]{3,})\/.*/)[1]
 
                 client.multi()
-                    // Perist service object in redis database
-                    .hmset(hash, service)
+                    // Perist response object in redis database
+                    .hmset(hash, response)
                     // Perist relations
-                    .sadd('/api/responses/' + service.campaign + path, hash)
+                    .sadd('/api/responses/' + response.campaign + path, hash)
                     .exec(function (err, replies) {
                         if (err) {
                             util.sendBody(req, res, 500, 'ECHEC', 'Error system')
@@ -48,16 +48,16 @@ router.post('/', function (req, res, next) {
                     })
 
             } else {
-                util.sendBody(req, res, 500, 'ECHEC', 'Service already exist')
+                util.sendBody(req, res, 500, 'ECHEC', 'Response already exist')
             }
         })
 
     } else {
-        util.sendBody(req, res, 500, 'ECHEC', 'Empty service name')
+        util.sendBody(req, res, 500, 'ECHEC', 'Empty response path')
     }
 })
 
-// Modify service
+// Modify response
 router.put('/', function (req, res, next) {
     var client = req.app.locals.redis
 
@@ -65,29 +65,25 @@ router.put('/', function (req, res, next) {
     var campaign = req.baseUrl.match(/\/api\/response\/(.*)/)[1]
     var hash = '/' + campaign + data.path
     var attributs = []
-    var service = {}
 
-    // Find service to construct attributs Array
-    client.hgetall(hash, function (err, currentService) {
-        if (currentService != null && currentService != undefined) {
-            var currentGroup = currentService.group
-
+    // Find response
+    client.hgetall(hash, function (err, currentResponse) {
+        if (currentResponse != null && currentResponse != undefined) {
             // Add attributs to Array from redis object, use for delete hash
-            for (var attr in currentService) {
+            for (var attr in currentResponse) {
                 attributs.push(attr)
             }
 
-            // hash service object
-            service = {
+            var response = {
                 campaign: campaign,
                 path: data.path,
-                response: (data.response != null && data.response !== undefined) ? data.response : currentService.response,
+                response: (data.response != null && data.response !== undefined) ? data.response : currentResponse.response,
             }
 
-            // hash service and relations
+            // Modify responses and relations
             client.multi()
-                // Perist service object in redis database
-                .hmset(hash, service)
+                // Perist response object in redis database
+                .hmset(hash, response)
                 .exec(function (err, replies) {
                     if (err) {
                         util.sendBody(req, res, 500, 'ECHEC', 'Error system')
@@ -97,12 +93,12 @@ router.put('/', function (req, res, next) {
                 })
 
         } else {
-            util.sendBody(req, res, 500, 'ECHEC', 'Service not found')
+            util.sendBody(req, res, 500, 'ECHEC', 'Response not found')
         }
     })
 })
 
-// Delete service
+// Delete response
 router.delete('/', function (req, res, next) {
     var client = req.app.locals.redis
 
@@ -111,23 +107,23 @@ router.delete('/', function (req, res, next) {
     var hash = '/' + campaign + data.path
     var attributs = []
 
-    // Find service to construct attributs Array
-    client.hgetall(hash, function (err, currentService) {
-        if (currentService != null && currentService != undefined) {
+    // Find response
+    client.hgetall(hash, function (err, currentResponse) {
+        if (currentResponse != null && currentResponse != undefined) {
             // Add attributs to Array
-            for (var s in currentService) {
+            for (var s in currentResponse) {
                 attributs.push(s)
             }
 
             // Retrieve path of service
-            var path = currentService.path.match(/(\/[A-Z-a-z-0-9-_]{3,}\/[A-Z-a-z-0-9-_]{3,}\/[A-Z-a-z-0-9-_]{3,})\/.*/)[1]
+            var path = currentResponse.path.match(/(\/[A-Z-a-z-0-9-_]{3,}\/[A-Z-a-z-0-9-_]{3,}\/[A-Z-a-z-0-9-_]{3,})\/.*/)[1]
 
-            // Delete service hash and relations
+            // Delete response and relations
             client.multi()
                 // Delete hash
                 .hdel(hash, attributs)
                 // Delete relations
-                .srem('/api/response/' + campaign + path, hash)
+                .srem('/api/responses/' + campaign + path, hash)
                 .exec(function (err, replies) {
                     if (err) {
                         util.sendBody(req, res, 500, 'ECHEC', 'Error system')
@@ -142,14 +138,14 @@ router.delete('/', function (req, res, next) {
     })
 })
 
-// Display list of services or service informations
+// Display list of responses or response informations
 router.get('/', function (req, res, next) {
     var client = req.app.locals.redis
 
     var campaign = req.baseUrl.match(/\/api\/responses?\/(.*)/)[1]
     var path = JSON.parse(req.query.path).path
 
-    // List of services or service informations
+    // List of response or response informations
     if (req.query.search == null || req.query.search == undefined) {
 
         // Sort in ascending order
@@ -170,10 +166,10 @@ router.get('/', function (req, res, next) {
         var search = req.query.search
         var hash = '/' + campaign + path + '/' + search
 
-        // Find service
-        client.hgetall(hash, function (err, currentService) {
-            if (currentService != null && currentService != undefined) {
-                util.sendBody(req, res, 200, JSON.stringify(currentService))
+        // Find response
+        client.hgetall(hash, function (err, currentResponse) {
+            if (currentResponse != null && currentResponse != undefined) {
+                util.sendBody(req, res, 200, JSON.stringify(currentResponse))
             } else {
                 util.sendBody(req, res, 404, 'ECHEC', 'Response not found')
             }

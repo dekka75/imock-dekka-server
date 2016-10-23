@@ -18,26 +18,6 @@ describe(
     function () {
         var response
 
-        // Initialize data sets to call real service
-        describe(
-            "30 - Init data sets",
-            function () {
-                var request = '/api/datasets'
-                before(function (done) {
-                    chai.request(server).get(request).set('content-type', 'application/json; charset=UTF-8').end(
-                        function (err, res) {
-                            response = res
-                            done()
-                        })
-                })
-                it('data sets initialized', function () {
-                    response.should.be.ok
-                    response.should.have.status(200)
-                    response.should.be.html
-                    response.text.should.match(/data sets initialized.../)
-                })
-            })
-
         // REST method get id=1
         describe(
             "31 - Call Rest service by GET method id=1",
@@ -54,8 +34,8 @@ describe(
                     response.should.be.ok
                     response.should.have.status(200)
                     response.should.be.json
-                    response.body.data.should.have.property('id')
-                    response.body.data.id.should.equal(1)
+                    response.body.should.have.property('id')
+                    response.body.id.should.equal(1)
                 })
             })
 
@@ -64,7 +44,7 @@ describe(
             "32 - Call Rest service by POST method id=3",
             function () {
                 var url = '/real/INBound/OUTBound/REST_POST'
-                var body = '{"credentials":{"id":3}}'
+                var body = '{"credential":{"id":3}}'
                 before(function (done) {
                     chai.request(server).post(url).set('content-type', 'application/json; charset=UTF-8').send(
                         body).end(function (err, res) {
@@ -76,8 +56,8 @@ describe(
                     response.should.be.ok
                     response.should.have.status(200)
                     response.should.be.json
-                    response.body.data.should.have.property('id')
-                    response.body.data.id.should.equal(3)
+                    response.body.should.have.property('id')
+                    response.body.id.should.equal(3)
                 })
             })
 

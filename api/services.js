@@ -122,31 +122,64 @@ router.put('/', function (req, res, next) {
     })
 })
 
-// Delete service
+// Delete service and responses
 router.delete('/', function (req, res, next) {
     var client = req.app.locals.redis
 
     var data = req.body
     var campaign = req.baseUrl.match(/\/api\/service\/(.*)/)[1]
     var path = data.path
-    var hash = '/' + campaign + path
-    var attributs = []
+    var hashService = ''
+    var hashResponse = ''
 
-    // Find service to construct attributs Array
-    client.hgetall(hash, function (err, currentService) {
+    // Retrieve all reponses to delete
+    client.sort('/api/responses/' + campaign + path, 'ALPHA', function (err, list) {
+        if (!err && list.length > 0) {
+            // Delete responses
+            for (var i = 0; i < list.length; i++) {
+                // Find response
+                client.hgetall(list[i], function (err, currentResponse) {
+                    if (currentResponse != null && currentResponse != undefined) {
+                        hashResponse = '/' + currentResponse.campaign + currentResponse.path
+
+                        // Add attributs to Array
+                        var attributs = []
+                        for (var s in currentResponse) {
+                            attributs.push(s)
+                        }
+                        // Delete service hash and relations
+                        client.multi()
+                            // Delete hash
+                            .hdel(hashResponse, attributs)
+                            // Delete relations
+                            .srem('/api/responses/' + campaign + path, hashResponse)
+                            .exec(function (err, replies) {
+                                console.log(hashResponse)
+                            })
+                    }
+                })
+            }
+        }
+    })
+
+    // Delete service
+    hashService = '/' + campaign + path
+    client.hgetall(hashService, function (err, currentService) {
         if (currentService != null && currentService != undefined) {
+
             // Add attributs to Array
+            var attributs = []
             for (var s in currentService) {
                 attributs.push(s)
             }
             // Delete service hash and relations
             client.multi()
                 // Delete hash
-                .hdel(hash, attributs)
+                .hdel(hashService, attributs)
                 // Delete relations
                 .srem('/api/groups', currentService.group)
                 .srem('/api/campaigns/' + currentService.group, campaign)
-                .srem('/api/services/' + campaign, hash)
+                .srem('/api/services/' + campaign, hashService)
                 .exec(function (err, replies) {
                     if (err) {
                         util.sendBody(req, res, 500, 'ECHEC', 'Error system')
@@ -154,11 +187,11 @@ router.delete('/', function (req, res, next) {
                         util.sendBody(req, res, 200, 'SUCCESS', 'Service deleted')
                     }
                 })
-
         } else {
             util.sendBody(req, res, 500, 'ECHEC', 'Service not found')
         }
     })
+
 })
 
 // Display list of services or service informations
