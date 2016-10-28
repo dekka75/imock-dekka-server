@@ -44,7 +44,26 @@ describe(
             })
 
         describe(
-            "10.b - Delete vitual service REST_GET",
+            "10.b - Purge old request response pairs",
+            function () {
+                var url = '/api/tools/purge'
+                before(function (done) {
+                    chai.request(server).post(url).set('content-type', 'application/json; charset=UTF-8').send().end(function (err, res) {
+                        response = res
+                        done()
+                    })
+                })
+                it('json response valid', function () {
+                    response.should.be.ok
+                    response.should.have.status(200)
+                    response.should.be.json
+                    response.body.should.have.property('code')
+                    response.body.code.should.equal('SUCCESS')
+                })
+            })
+
+        describe(
+            "10.c - Delete vitual service REST_GET",
             function () {
                 var url = '/api/service/mock'
                 var body = {
@@ -66,7 +85,7 @@ describe(
             })
 
         describe(
-            "10.c - Delete vitual service REST_POST",
+            "10.d - Delete vitual service REST_POST",
             function () {
                 var url = '/api/service/mock'
                 var body = {
@@ -88,7 +107,7 @@ describe(
             })
 
         describe(
-            "10.d - Delete vitual service SOAP",
+            "10.e - Delete vitual service SOAP",
             function () {
                 var url = '/api/service/mock'
                 var body = {
@@ -110,7 +129,7 @@ describe(
             })
 
         describe(
-            "10.e - Delete real service REST_GET",
+            "10.f - Delete real service REST_GET",
             function () {
                 var url = '/api/service/real'
                 var body = {
@@ -132,7 +151,7 @@ describe(
             })
 
         describe(
-            "10.f - Delete real service REST_POST",
+            "10.g - Delete real service REST_POST",
             function () {
                 var url = '/api/service/real'
                 var body = {
@@ -154,7 +173,7 @@ describe(
             })
 
         describe(
-            "10.g - Delete real service SOAP",
+            "10.h - Delete real service SOAP",
             function () {
                 var url = '/api/service/real'
                 var body = {
@@ -172,6 +191,25 @@ describe(
                     response.should.be.json
                     response.body.should.have.property('code')
                     response.body.code.should.match(/[SUCCESS|ECHEC]/)
+                })
+            })
+
+        describe(
+            "10.i - Clean ALL",
+            function () {
+                var url = '/api/tools/clean'
+                before(function (done) {
+                    chai.request(server).post(url).set('content-type', 'application/json; charset=UTF-8').send().end(function (err, res) {
+                        response = res
+                        done()
+                    })
+                })
+                it('json response valid', function () {
+                    response.should.be.ok
+                    response.should.have.status(200)
+                    response.should.be.json
+                    response.body.should.have.property('code')
+                    response.body.code.should.equal('SUCCESS')
                 })
             })
 

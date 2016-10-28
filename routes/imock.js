@@ -3,8 +3,11 @@
 
 'use strict'
 
-var trace = require('util')
+const MOCK = 0
+const REAL = 1
+
 var debug = require('debug')('imock:server:router')
+var trace = require('util')
 var express = require('express')
 var redis = require('redis')
 var request = require("request")
@@ -25,8 +28,8 @@ router.all('/', function (req, res, next) {
     // Search service informations
     client.hgetall(req.baseUrl, function (err, service) {
         if (service != null && service != undefined) {
-            var real = parseInt(service.real, 10)
-            if (real == 1) {
+            var mode = parseInt(service.real, 10)
+            if (mode == REAL) {
                 // Real services
                 var uri = service.producer + req.originalUrl.match(/\/[A-Z-a-z-0-9]{3,}(\/.*)/)[1] // Without Version
                 var headers = req.headers
@@ -56,14 +59,14 @@ router.all('/', function (req, res, next) {
                 // Call real service
                 request(options, function (err, response, body) {
                     if (err) {
-                        sendBody('real', req, res, service, '{"code": "ERROR","description": "Connection error"}', 'No response from producer')
+                        sendBody(client, mode, req, res, null, '{"code": "ERROR","description": "Connection error"}', 'No response from producer')
                     } else {
                         var headers = response.headers
                         delete headers['Content-Length']
                         delete headers['transfer-encoding']
                         res.set(headers)
                         res.status(response.statusCode)
-                        sendBody('real', req, res, service, body)
+                        sendBody(client, mode, req, res, service, body)
                     }
                 })
 
@@ -85,23 +88,24 @@ router.all('/', function (req, res, next) {
                 if (service.path == hash) {
                     // Return default response
                     sleep(tdr, service.response, function (body) {
-                        sendBody('mock', req, res, service, body)
+                        sendBody(client, mode, req, res, service, body)
                     })
                 } else {
                     // Search response
-                    client.hgetall(hash, function (err, service) {
-                        if (service != null && service != undefined) {
-                            sleep(tdr, service.response, function (body) {
-                                sendBody('mock', req, res, service, body)
+                    client.hgetall(hash, function (err, response) {
+                        if (response != null && response != undefined) {
+                            sleep(tdr, response.response, function (body) {
+                                sendBody(client, mode, req, res, response, body)
                             })
                         } else {
-                            sendBody('mock', req, res, service, '{"code": "ERROR","description": "Response not found"}', 'Response not found: ' + hash)
+                            sendBody(client, mode, req, res, null, '{"code": "ERROR","description": "Response not found"}', 'Response not found: ' + hash)
                         }
                     })
                 }
             }
+
         } else {
-            sendBody('mock', req, res, service, '{"code": "ERROR","description": "Service not found"}', 'Service not found: ' + req.baseUrl)
+            sendBody(client, MOCK, req, res, null, '{"code": "ERROR","description": "Service not found"}', 'Service not found: ' + req.baseUrl)
         }
     })
 })
@@ -177,8 +181,8 @@ function sleep(tdr, body, done) {
  * @param {string} body
  * @param {string} mess
  */
-function sendBody(mode, req, res, service, body, mess) {
-    if (mode == 'mock') {
+function sendBody(client, mode, req, res, service, body, mess) {
+    if (mode == MOCK) {
         // TODO: Don't take content-type from request 
         if (/application\/json/.test(req.get('content-type'))) {
             res.set('Content-Type', 'application/json; charset=UTF-8')
@@ -194,36 +198,43 @@ function sendBody(mode, req, res, service, body, mess) {
         } else {
             res.status(200)
         }
-    } else if (mode == 'real' && mess != null && mess != undefined) {
+
+    } else if (mode == REAL && mess != null && mess != undefined) {
         res.set('Content-Type', 'application/json; charset=UTF-8')
     }
+
     // Send response
     res.send(body)
     if (mess != null) {
         debug(mess)
     }
-    // Redis
-    var client = req.app.locals.redis
 
-    // Bunyan
-    var traffic = req.app.locals.traffic
+    if (service != null && service != undefined) {
+        // Get request response pair
+        var rrp = getRequestResponsePair(mode, beginAt, req, res, service, body)
 
-    // Get request response pair
-    var rrp = getRequestResponsePair(mode, beginAt, req, res, service, body)
+        // Save request response pair objet and relations
+        client.multi()
+            // Perist request response pair object in redis database
+            .hmset('/' + rrp.campaign + rrp.path, rrp)
+            // Perist relations
+            .sadd('/api/rrp/' + rrp.campaign + rrp.url, '/' + rrp.campaign + rrp.path)
+            .exec(function (err, replies) {})
 
-    // Save request response pair
-    client.hmset(rrp.path, rrp)
+        // Bunyan (for asynchrone log)
+        var traffic = req.app.locals.traffic
 
-    // Log request response pair
-    traffic.info(rrp, 'traffic')
+        // Log request response pair
+        traffic.info(rrp, 'traffic')
+    }
 }
 
 /**
  * 
  * Generate json object request response pair
  * 
- * a) Use for view rest or soap exchange
- * b) Use for log rest or soap exchange
+ * 1) Use for view rest and soap exchange
+ * 2) Use for log rest and soap exchange
  * 
  * @param {string} mode
  * @param {Date} beginAt
@@ -234,20 +245,28 @@ function sendBody(mode, req, res, service, body, mess) {
  * @returns {Object}
  */
 function getRequestResponsePair(mode, beginAt, req, res, service, resBody) {
+    var campaign = ''
+    var path = ''
+    var url = ''
+    var query = ''
     var endAt = new Date().getTime()
     var duration = endAt - beginAt
-    var campaign = req.baseUrl.match(/\/([A-Z-a-z-0-9-_]{3,})\/.*/)[1]
-    var url = req.baseUrl.match(/\/[A-Z-a-z-0-9-_]{3,}(\/.*)/)[1]
     var uid = 'rrp-' + Math.floor(Math.random() * 10) + parseInt(beginAt).toString(36).toUpperCase()
-    var path = '/' + campaign + '/NoServiceFound/' + uid
-    var consumers = req.get('host').match('/^https?:/\/\/') ? req.get('host') : 'http://' + req.get('host')
+    var consumers = req.get('host').match('/^https?:\/\//') ? req.get('host') : 'http://' + req.get('host')
     var producer = ''
     var reqBody = ''
+    try {
+        campaign = req.baseUrl.match(/\/([A-Z-a-z-0-9-_]{3,})\/.*/)[1]
+        url = req.baseUrl.match(/\/[A-Z-a-z-0-9-_]{3,}(\/.*)/)[1]
+        query = req.originalUrl.match(/\/[A-Z-a-z-0-9-_]{3,}\/[A-Z-a-z-0-9-_]{3,}\/[A-Z-a-z-0-9-_]{3,}\/.*\?(.*)/)[1]
+    } catch (e) {}
     if (service != null && service != undefined) {
-        path = service.path + '/' + uid
+        path = url + '/' + uid
         if (service.producer != null && service.producer != undefined) {
             producer = service.producer
         }
+    } else {
+        path = '/NoServiceFound/' + uid
     }
     if (JSON.stringify(req.body) != '{}') {
         // TODO: dont take content-type from request
@@ -261,15 +280,13 @@ function getRequestResponsePair(mode, beginAt, req, res, service, resBody) {
     var rrp = {
         campaign: campaign,
         path: path,
-        start: beginAt.toString(),
-        stop: endAt.toString(),
         mode: mode,
         consumers: consumers,
         producer: producer,
         method: req.method,
         status: res.statusCode,
         url: url,
-        query: req.url,
+        query: query,
         reqHeaders: JSON.stringify(req.headers),
         reqContentType: req.get('Content-Type'),
         reqLength: reqBody.length,
@@ -278,6 +295,8 @@ function getRequestResponsePair(mode, beginAt, req, res, service, resBody) {
         resContentType: res.get('Content-Type'),
         resLength: resBody.length,
         resBody: resBody,
+        start: beginAt.toString(),
+        stop: endAt.toString(),
         duration: duration
     }
     return rrp

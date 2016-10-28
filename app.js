@@ -20,6 +20,7 @@ var groups = require('./api/groups')
 var campaigns = require('./api/campaigns')
 var services = require('./api/services')
 var responses = require('./api/responses')
+var tools = require('./api/tools')
 var routes = require('./routes/imock')
 
 // Redis access
@@ -61,6 +62,7 @@ app.use(/\/api\/groups/, groups)
 app.use(/\/api\/campaigns\/.*/, campaigns)
 app.use(/\/api\/services?\/.*/, services)
 app.use(/\/api\/responses?\/.*/, responses)
+app.use(/\/api\/tools\/.*/, tools)
 
 // Campaign - InBound - OutBound - Service
 app.use(/\/[A-Z-a-z-0-9-_]{3,}\/[A-Z-a-z-0-9-_]{3,}\/[A-Z-a-z-0-9-_]{3,}\/.*/, routes)

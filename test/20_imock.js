@@ -186,7 +186,7 @@ describe(
 		describe(
 			"28 - Response does not exist",
 			function () {
-				var request = '/mock/INBound/OUTBound/GET_REST_01?id=999'
+				var request = '/mock/INBound/OUTBound/GET_REST?id=999'
 				before(function (done) {
 					chai.request(server).get(request).set('content-type', 'application/json; charset=UTF-8')
 						.end(function (err, res) {

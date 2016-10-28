@@ -3,8 +3,8 @@
 
 'use strict'
 
-var trace = require('util')
 var debug = require('debug')('imock:server:api:list')
+var trace = require('util')
 var express = require('express')
 var redis = require('redis')
 var util = require('../util')

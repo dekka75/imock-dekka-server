@@ -3,8 +3,8 @@
 
 'use strict'
 
-var trace = require('util')
 var debug = require('debug')('imock:server:api:services')
+var trace = require('util')
 var express = require('express')
 var redis = require('redis')
 var util = require('../util')
@@ -153,9 +153,7 @@ router.delete('/', function (req, res, next) {
                             .hdel(hashResponse, attributs)
                             // Delete relations
                             .srem('/api/responses/' + campaign + path, hashResponse)
-                            .exec(function (err, replies) {
-                                console.log(hashResponse)
-                            })
+                            .exec(function (err, replies) {})
                     }
                 })
             }

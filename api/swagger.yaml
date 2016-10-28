@@ -30,7 +30,7 @@ paths:
           schema:
            "$ref": "#/definitions/Service"
       responses:
-        200:
+        201:
           description: "Service create"
           schema:
            "$ref": "#/definitions/Message"
@@ -158,7 +158,7 @@ paths:
           schema:
            "$ref": "#/definitions/Response"
       responses:
-        200:
+        201:
           description: "Response create"
           schema:
            "$ref": "#/definitions/Message"
@@ -281,22 +281,6 @@ paths:
           description: "Error system"
           schema:
            "$ref": "#/definitions/Message"           
-  /groups:
-    get:
-      description: "List of groups"
-      responses:
-        200:
-          description: "List of groups"
-          schema:
-           "$ref": "#/definitions/GroupList"
-        404:
-          description: "Empty list"
-          schema:
-           "$ref": "#/definitions/Message"
-        500:
-          description: "Error system"
-          schema:
-           "$ref": "#/definitions/Message"
   /campaigns/{group}:
     get:
       description: "List of campaigns"
@@ -314,6 +298,58 @@ paths:
            "$ref": "#/definitions/CampaignList"
         404:
           description: "Empty list"
+          schema:
+           "$ref": "#/definitions/Message"
+        500:
+          description: "Error system"
+          schema:
+           "$ref": "#/definitions/Message"
+  /groups:
+    get:
+      description: "List of groups"
+      responses:
+        200:
+          description: "List of groups"
+          schema:
+           "$ref": "#/definitions/GroupList"
+        404:
+          description: "Empty list"
+          schema:
+           "$ref": "#/definitions/Message"
+        500:
+          description: "Error system"
+          schema:
+           "$ref": "#/definitions/Message"
+  /tools/clean:
+    post:
+      description: "Flush database"
+      responses:
+        200:
+          description: "Database flush"
+          schema:
+           "$ref": "#/definitions/Message"
+        500:
+          description: "Error system"
+          schema:
+           "$ref": "#/definitions/Message"
+  /tools/purge:
+    post:
+      description: "Delete expire request response pair"
+      responses:
+        200:
+          description: "Request response pair delete"
+          schema:
+           "$ref": "#/definitions/Message"
+        500:
+          description: "Error system"
+          schema:
+           "$ref": "#/definitions/Message"
+  /tools/import:
+    post:
+      description: "Import database sets"
+      responses:
+        200:
+          description: "Database sets import"
           schema:
            "$ref": "#/definitions/Message"
         500:
