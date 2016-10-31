@@ -4,7 +4,6 @@
 'use strict'
 
 var debug = require('debug')('imock:server:api:list')
-var trace = require('util')
 var express = require('express')
 var redis = require('redis')
 var util = require('../util')
@@ -12,6 +11,7 @@ var router = express.Router()
 
 // List of campaigns
 router.get('/', function (req, res, next) {
+    var locals = res.locals
     var client = req.app.locals.redis
 
     var campaign = req.baseUrl.match(/\/api\/campaigns\/(.*)/)[1]
@@ -19,12 +19,14 @@ router.get('/', function (req, res, next) {
     // Sort in ascending order
     client.sort('/api/campaigns/' + campaign, 'ALPHA', function (err, list) {
         if (err) {
-            util.sendBody(req, res, 500, 'ECHEC', 'List not found')
+            return next(util.getMessage(500, 'List not found'))
         } else {
             if (list.length > 0) {
-                util.sendBody(req, res, 200, JSON.stringify(list))
+                locals.status = 200
+                locals.payload = JSON.stringify(list)
+                return next()
             } else {
-                util.sendBody(req, res, 404, 'ECHEC', 'Empty list')
+                return next(util.getMessage(404, 'Empty list'))
             }
         }
     })

@@ -55,10 +55,9 @@ describe(
                 })
                 it('json response valid', function () {
                     response.should.be.ok
-                    response.should.have.status(200)
                     response.should.be.json
                     response.body.should.have.property('code')
-                    response.body.code.should.equal('SUCCESS')
+                    response.body.code.should.match(/[SUCCESS|ECHEC]/)
                 })
             })
 
@@ -289,7 +288,7 @@ describe(
                     "designation": "imock unit tests",
                     "group": "imock",
                     "attribut": "id",
-                    "contentType": "application/json; charset=UTF-8",
+                    "contentType": "text/xml; charset=UTF-8",
                     "status": 200,
                     "response": '<SOAP-ENV:Envelope xmlns:SOAP-ENV="http://schemas.xmlsoap.org/soap/envelope/" xmlns:ns1="http://www.orange.com/rbq/g3/soap/v2"><SOAP-ENV:Header></SOAP-ENV:Header><SOAP-ENV:Body><ns1:SOAP><data><id>0</id><first_name>bar</first_name><last_name>foo</last_name><Label></Label></data></ns1:SOAP></SOAP-ENV:Body></SOAP-ENV:Envelope>',
                     "real": 0,
@@ -443,7 +442,6 @@ describe(
                 })
             })
 
-        // Create a response for a virtual service REST_POST
         describe(
             "13.a - Create a response for a vitual service REST_POST id=3",
             function () {
@@ -563,6 +561,7 @@ describe(
                     response.body.code.should.equal('ECHEC')
                 })
             })
+
 
         // Modify virtual service
         describe(
@@ -711,4 +710,5 @@ describe(
                     response.body.path.should.equal('/INBound/OUTBound/SOAP/6')
                 })
             })
+
     })

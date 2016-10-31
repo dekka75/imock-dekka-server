@@ -7,7 +7,6 @@ var debug = require('debug')('imock:server:app')
 var express = require('express')
 var redis = require('redis')
 var bunyan = require('bunyan')
-var path = require('path')
 var compression = require('compression')
 var bodyParser = require('body-parser')
 var xmlParser = require('express-xml-bodyparser')
@@ -45,17 +44,12 @@ app.locals.traffic = bunyan.createLogger({
 app.disable('x-powered-by')
 app.disable('etag')
 
-// View engine setup
-app.set('views', path.join(__dirname, 'views'))
-app.set('view engine', 'jade')
-
 app.use(compression())
 app.use(bodyParser.json())
 app.use(xmlParser({
     trim: false,
     explicitArray: false
 }))
-app.use(express.static(path.join(__dirname, 'public')))
 
 // api
 app.use(/\/api\/groups/, groups)
@@ -69,32 +63,45 @@ app.use(/\/[A-Z-a-z-0-9-_]{3,}\/[A-Z-a-z-0-9-_]{3,}\/[A-Z-a-z-0-9-_]{3,}\/.*/, r
 
 // Catch 404 and forward to error handler
 app.use(function (req, res, next) {
-    var err = new Error('Not Found')
-    err.status = 404
-    next(err)
+    var payload = res.locals.payload
+    if (payload != null && payload != undefined) {
+        var err = new Error()
+        next(err)
+    } else {
+        var err = new Error('Not Found')
+        err.status = 404
+        next(err)
+    }
 })
 
 // Error handlers
 
 // Development error handler - will print stacktrace
-if (app.get('env') != 'production') {
-    app.use(function (err, req, res, next) {
-        debug('404 Not found...')
-        res.status(err.status || 500)
-        res.render('error', {
-            message: err.message,
-            error: err
-        })
-    })
-}
-
-// Production error handler - no stacktraces leaked to user
 app.use(function (err, req, res, next) {
-    res.status(err.status || 500)
-    res.render('error', {
-        message: err.message,
-        error: {}
-    })
+    var status = res.locals.status || err.status || 500
+    var contentType = res.locals.contentType
+    var payload = res.locals.payload
+    var code = (status >= 200 && status <= 226) ? 'SUCCESS' : 'ECHEC'
+    var message = app.get('env') == 'production' ? 'Internal Server Error' : code == "SUCCESS" ? err.message : err.stack.split("\n")
+
+    // TODO: Don't leave Allow-Origin in production ?
+    res.set('Access-Control-Allow-Origin', '*')
+    res.set('X-Powered-By', 'Intelligent Mock <!/^.*$/!>')
+    res.set('Content-Type', (contentType != null && contentType != undefined) ? contentType : 'application/json; charset=UTF-8')
+    res.set('Cache-Control', 'public, max-age=0')
+    res.status(status)
+    if (payload != null && payload != undefined) {
+        res.send(payload)
+    } else {
+        res.send({
+            code: code,
+            status: status,
+            message: message
+        })
+    }
+    if (app.get('env') != 'production') {
+        debug(err)
+    }
 })
 
 module.exports = app

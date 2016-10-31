@@ -35,7 +35,7 @@ paths:
           schema:
            "$ref": "#/definitions/Message"
         500:
-          description: "Error system"
+          description: "Internal Server Error"
           schema:
            "$ref": "#/definitions/Message"
     put:
@@ -63,7 +63,7 @@ paths:
           schema:
            "$ref": "#/definitions/Message"
         500:
-          description: "Error system"
+          description: "Internal Server Error"
           schema:
            "$ref": "#/definitions/Message"
     delete:
@@ -91,7 +91,7 @@ paths:
           schema:
            "$ref": "#/definitions/Message"
         500:
-          description: "Error system"
+          description: "Internal Server Error"
           schema:
            "$ref": "#/definitions/Message"
     get:
@@ -138,7 +138,7 @@ paths:
           schema:
            "$ref": "#/definitions/Message"
         500:
-          description: "Error system"
+          description: "Internal Server Error"
           schema:
            "$ref": "#/definitions/Message"
   /response/{campaign}:
@@ -163,7 +163,7 @@ paths:
           schema:
            "$ref": "#/definitions/Message"
         500:
-          description: "Error system"
+          description: "Internal Server Error"
           schema:
            "$ref": "#/definitions/Message"
     put:
@@ -191,7 +191,7 @@ paths:
           schema:
            "$ref": "#/definitions/Message"
         500:
-          description: "Error system"
+          description: "Internal Server Error"
           schema:
            "$ref": "#/definitions/Message"
     delete:
@@ -219,7 +219,7 @@ paths:
           schema:
            "$ref": "#/definitions/Message"
         500:
-          description: "Error system"
+          description: "Internal Server Error"
           schema:
            "$ref": "#/definitions/Message"
     get:
@@ -278,7 +278,7 @@ paths:
           schema:
            "$ref": "#/definitions/Message"
         500:
-          description: "Error system"
+          description: ""
           schema:
            "$ref": "#/definitions/Message"           
   /campaigns/{group}:
@@ -301,7 +301,7 @@ paths:
           schema:
            "$ref": "#/definitions/Message"
         500:
-          description: "Error system"
+          description: "Internal Server Error"
           schema:
            "$ref": "#/definitions/Message"
   /groups:
@@ -317,7 +317,7 @@ paths:
           schema:
            "$ref": "#/definitions/Message"
         500:
-          description: "Error system"
+          description: "Internal Server Error"
           schema:
            "$ref": "#/definitions/Message"
   /tools/clean:
@@ -329,7 +329,7 @@ paths:
           schema:
            "$ref": "#/definitions/Message"
         500:
-          description: "Error system"
+          description: "Internal Server Error"
           schema:
            "$ref": "#/definitions/Message"
   /tools/purge:
@@ -341,7 +341,7 @@ paths:
           schema:
            "$ref": "#/definitions/Message"
         500:
-          description: "Error system"
+          description: "Internal Server Error"
           schema:
            "$ref": "#/definitions/Message"
   /tools/import:
@@ -353,7 +353,15 @@ paths:
           schema:
            "$ref": "#/definitions/Message"
         500:
-          description: "Error system"
+          description: ""
+          schema:
+           "$ref": "#/definitions/Message"
+  /tools/version:
+    get:
+      description: "Version"
+      responses:
+        200:
+          description: "Database flush"
           schema:
            "$ref": "#/definitions/Message"
 
@@ -467,6 +475,10 @@ definitions:
   Message:
     type: object
     properties:
+      status:
+        description: "Status"
+        type: integer
+        format: int64
       code:
         description: "Code of message or error"
         type: string

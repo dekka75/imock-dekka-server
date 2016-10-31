@@ -7,7 +7,6 @@ const MOCK = 0
 const REAL = 1
 
 var debug = require('debug')('imock:server:router')
-var trace = require('util')
 var express = require('express')
 var redis = require('redis')
 var request = require("request")
@@ -85,7 +84,7 @@ router.all('/', function (req, res, next) {
                     }
                 }
                 // No response, return default
-                if (service.path == hash) {
+                if (hash == '/' + service.campaign + service.path) {
                     // Return default response
                     sleep(tdr, service.response, function (body) {
                         sendBody(client, mode, req, res, service, body)
@@ -215,9 +214,9 @@ function sendBody(client, mode, req, res, service, body, mess) {
 
         // Save request response pair objet and relations
         client.multi()
-            // Perist request response pair object in redis database
+            // Persist request response pair object in redis database
             .hmset('/' + rrp.campaign + rrp.path, rrp)
-            // Perist relations
+            // Persist relations
             .sadd('/api/rrp/' + rrp.campaign + rrp.url, '/' + rrp.campaign + rrp.path)
             .exec(function (err, replies) {})
 
