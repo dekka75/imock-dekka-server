@@ -1,0 +1,21 @@
+imock: "0.0.1"
+info:
+  campaign: "real"
+  group: "imock"
+  designation: "imock unit tests"
+
+services:
+  # Real REST_GET
+  - path: "/INBound/OUTBound/REST_GET"
+    real: 1
+    producer: "http://192.168.56.102:8080/mock"
+
+  # Real REST_POST
+  - path: "/INBound/OUTBound/REST_POST"
+    real: 1
+    producer: "http://192.168.56.102:8080/mock"
+
+  # Real SOAP
+  - path: "/INBound/OUTBound/SOAP"
+    real: 1
+    producer: "http://192.168.56.102:8080/mock"

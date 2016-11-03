@@ -15,11 +15,11 @@ var xmlParser = require('express-xml-bodyparser')
 debug('process.env.NODE_ENV: ' + process.env.NODE_ENV)
 
 var app = express()
-var groups = require('./api/groups')
-var campaigns = require('./api/campaigns')
-var services = require('./api/services')
-var responses = require('./api/responses')
-var tools = require('./api/tools')
+var groups = require('./routes/groups')
+var campaigns = require('./routes/campaigns')
+var services = require('./routes/services')
+var responses = require('./routes/responses')
+var tools = require('./routes/tools')
 var routes = require('./routes/imock')
 
 // Redis access

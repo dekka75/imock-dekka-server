@@ -669,9 +669,9 @@ describe(
                 })
             })
 
-        // Services informations
+        // Services details
         describe(
-            "18.a - Service informations",
+            "18.a - Service details",
             function () {
                 var request = '/api/service/mock?path={"path":"/INBound/OUTBound/REST_POST"}'
                 before(function (done) {
@@ -692,7 +692,7 @@ describe(
 
         // Response informations
         describe(
-            "18.b - Response informations",
+            "18.b - Response details",
             function () {
                 var request = '/api/response/mock?path={"path":"/INBound/OUTBound/SOAP"}&search=6'
                 before(function (done) {
@@ -708,6 +708,46 @@ describe(
                     response.should.be.json
                     response.body.should.have.property('path')
                     response.body.path.should.equal('/INBound/OUTBound/SOAP/6')
+                })
+            })
+
+
+        // Import datasets
+        describe(
+            "19.a - Clean ALL",
+            function () {
+                var url = '/api/tools/clean'
+                before(function (done) {
+                    chai.request(server).post(url).set('content-type', 'application/json; charset=UTF-8').send().end(function (err, res) {
+                        response = res
+                        done()
+                    })
+                })
+                it('json response valid', function () {
+                    response.should.be.ok
+                    response.should.have.status(200)
+                    response.should.be.json
+                    response.body.should.have.property('code')
+                    response.body.code.should.equal('SUCCESS')
+                })
+            })
+
+        describe(
+            "19.b - Import datasets",
+            function () {
+                var url = '/api/tools/import?filter={"data":"^00_.*\.(yaml)$"}'
+                before(function (done) {
+                    chai.request(server).post(url).set('content-type', 'application/json; charset=UTF-8').send().end(function (err, res) {
+                        response = res
+                        done()
+                    })
+                })
+                it('json response valid', function () {
+                    response.should.be.ok
+                    response.should.have.status(200)
+                    response.should.be.json
+                    response.body.should.have.property('code')
+                    response.body.code.should.equal('SUCCESS')
                 })
             })
 

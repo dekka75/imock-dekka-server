@@ -8,7 +8,7 @@ chai.use(chaiHttp)
 var should = chai.should()
 
 // System under test
-var util = require('../util')
+var util = require('../models/util')
 
 describe("Virtual services other", function () {
 	// Get Objet data
@@ -17,19 +17,19 @@ describe("Virtual services other", function () {
 			'soap-env:envelope': {
 				'$': {
 					'xmlns:SOAP-ENV': 'http://schemas.xmlsoap.org/soap/envelope/',
-					'xmlns:ns1': 'http://www.orange.com/Interfaces/ManagePcmService/v1'
+					'xmlns:ns1': 'http://www.dekka.com/Interfaces/ManageService/v1'
 				},
 				'soap-env:body': {
-					'ns1:getlineinfo': {
-						'ns1:idsiu': '1140301142528135',
-						'ns1:msisdn': '0638507077'
+					'ns1:getinfo': {
+						'ns1:id': '1140301142528135',
+						'ns1:msisdn': '0612345678'
 					}
 				}
 			}
 		}
 		it('object data valid', function () {
 			var response = util.getItemValue(obj, 'msisdn')
-			response.should.match(/0638507077/)
+			response.should.match(/0612345678/)
 		})
 	})
 })

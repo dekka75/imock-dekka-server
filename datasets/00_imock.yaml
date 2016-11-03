@@ -1,0 +1,55 @@
+imock: "0.0.1"
+info:
+  campaign: "mock"
+  group: "imock"
+  designation: "imock unit tests"
+
+services:
+  # REST_GET
+  - path: "/INBound/OUTBound/REST_GET"
+    attribut: "id"
+    contentType: "application/json; charset=UTF-8"
+    status: 200
+    response: '{"id":0,"first_name":"foo","last_name":"bar","Label":""}'
+    real: 0
+    producer: "nodefined"
+    min: 100
+    max: 200
+    responses:
+      - path: "/INBound/OUTBound/REST_GET/1"
+        response: '{"id":1,"first_name":"Isaac","last_name":"Asimov","Label":"HAL-<!\d{9}!>"}'
+      - path: "/INBound/OUTBound/REST_GET/2"
+        response: '{"id":2,"first_name":"Ray","last_name":"Bradbury","Label":"HAL-<!\d{9}!>"}'
+
+  # REST_POST
+  - path: "/INBound/OUTBound/REST_POST"
+    attribut: "credential.id"
+    contentType: "application/json; charset=UTF-8"
+    status: 200
+    response: '{"id":0,"first_name":"foo","last_name":"bar","Label":""}'
+    real: 0
+    producer: "nodefined"
+    min: 100
+    max: 200
+    responses:
+      - path: "/INBound/OUTBound/REST_POST/3"
+        response: '{"id":3,"first_name":"Jules","last_name":"Verne","Label":"HAL-<!\d{9}!>"}'
+      - path: "/INBound/OUTBound/REST_POST/4"
+        response: '{"id":4,"first_name":"George","last_name":"Orwell","Label":"HAL-<!\d{9}!>"}'
+
+  # SOAP
+  - path: "/INBound/OUTBound/SOAP"
+    attribut: "id"
+    contentType: "text/xml; charset=UTF-8"
+    status: 200
+    response: '<SOAP-ENV:Envelope xmlns:SOAP-ENV="http://schemas.xmlsoap.org/soap/envelope/"  xmlns:ns1="http://www.orange.com/rbq/g3/soap/v2"><SOAP-ENV:Header></SOAP-ENV:Header><SOAP-ENV:Body><ns1:SOAP><data><id>0</id><first_name>bar</first_name><last_name>foo</last_name><Label></Label></data></ns1:SOAP></SOAP-ENV:Body></SOAP-ENV:Envelope>'
+    real: 0
+    producer: "nodefined"
+    min: 100
+    max: 200
+    responses:
+      - path: "/INBound/OUTBound/SOAP/5"
+        response: '<SOAP-ENV:Envelope xmlns:SOAP-ENV="http://schemas.xmlsoap.org/soap/envelope/" xmlns:ns1="http://www.orange.com/rbq/g3/soap/v2"><SOAP-ENV:Header></SOAP-ENV:Header><SOAP-ENV:Body><ns1:SOAP><data><id>5</id><first_name>Orson</first_name><last_name>Scott Card</last_name><Label>HAL-<!\d{9}!></Label></data></ns1:SOAP></SOAP-ENV:Body></SOAP-ENV:Envelope>'
+      - path: "/INBound/OUTBound/SOAP/6"
+        response: '<SOAP-ENV:Envelope xmlns:SOAP-ENV="http://schemas.xmlsoap.org/soap/envelope/" xmlns:ns1="http://www.orange.com/rbq/g3/soap/v2"><SOAP-ENV:Header></SOAP-ENV:Header><SOAP-ENV:Body><ns1:SOAP><data><id>6</id><first_name>Robert</first_name><last_name>Silverberg</last_name><Label>HAL-<!\d{9}!></Label></data></ns1:SOAP></SOAP-ENV:Body></SOAP-ENV:Envelope>'
+

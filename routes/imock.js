@@ -6,12 +6,11 @@
 const MOCK = 0
 const REAL = 1
 
-var debug = require('debug')('imock:server:router')
+var debug = require('debug')('imock:server:routes:imock')
 var express = require('express')
-var redis = require('redis')
 var request = require("request")
 var randexp = require('randexp')
-var util = require('../util')
+var util = require('../models/util')
 
 var router = express.Router()
 var beginAt
@@ -24,7 +23,7 @@ router.all('/', function (req, res, next) {
     // Redis
     var client = req.app.locals.redis
 
-    // Search service informations
+    // Search service details
     client.hgetall(req.baseUrl, function (err, service) {
         if (service != null && service != undefined) {
             var mode = parseInt(service.real, 10)
