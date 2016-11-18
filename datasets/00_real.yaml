@@ -1,8 +1,8 @@
 imock: "0.0.1"
-info:
+infos:
   campaign: "real"
   group: "imock"
-  designation: "imock unit tests"
+  designation: "Unit tests"
 
 services:
   # Real REST_GET

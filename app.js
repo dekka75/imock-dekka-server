@@ -1,6 +1,6 @@
 // DESCRIPTION:    Virtual services REST & SOAP
 // MAINTAINER:     Didier Kimès <didier.kimes@gmail.com>
-// TO_RUN:         /home/nodejs/nodejs DEBUG=mock:* npm start
+// TO_RUN:         /home/node/nodejs DEBUG=mock:* npm start
 // TO_DEBUG:       console.log(trace.inspect(response, {depth: 1, showHidden: false}))
 
 var debug = require('debug')('imock:server:app')

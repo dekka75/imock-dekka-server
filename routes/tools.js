@@ -36,7 +36,7 @@ router.post('/', function (req, res, next) {
         })
 
     } else if (action == 'import') {
-        // Import datasets
+        // Import datasets (require filter path)
         tools.import(req, function (reply) {
             return next(reply)
         })

@@ -90,13 +90,13 @@ module.exports.import = function (req, done) {
                 try {
                     // Get datasets, or throw exception on error
                     var datasets = yaml.safeLoad(fs.readFileSync("./datasets/" + file, 'utf8'))
-                    var campaign = datasets.info.campaign
+                    var campaign = datasets.infos.campaign
 
                     // Loop services
                     datasets.services.forEach(function (service, j) {
                         // Ignore header infos
-                        service.designation = (service.designation != null && service.designation != undefined) ? service.designation : datasets.info.designation
-                        service.group = (service.group != null && service.group != undefined) ? service.group : datasets.info.group
+                        service.designation = (service.designation != null && service.designation != undefined) ? service.designation : datasets.infos.designation
+                        service.group = (service.group != null && service.group != undefined) ? service.group : datasets.infos.group
 
                         // Create service object and store to redis database
                         services.create(req, campaign, service, function (reply) {

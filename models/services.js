@@ -242,14 +242,14 @@ module.exports.detail = function (req, campaign, done) {
     // Find service
     client.hgetall(hash, function (err, currentService) {
         if (err) {
-            done(util.getMessage(500, 'Internal Server Error'))
+            done(util.getMessage(500, 'Internal Server Error'), null)
 
         } else if (currentService != null && currentService != undefined) {
             // Return service content
-            done(util.getMessage(200, JSON.stringify(currentService)))
+            done(null, util.getMessage(200, JSON.stringify(currentService)))
 
         } else {
-            done(util.getMessage(404, 'Service not found'))
+            done(util.getMessage(404, 'Service not found'), null)
 
         }
     })
@@ -260,26 +260,88 @@ module.exports.detail = function (req, campaign, done) {
  * List of service
  * 
  * @param {object} req
- * @param {string} campaign
+ * @param {string} group
  * @param {function} callback
  */
-module.exports.list = function (req, campaign, done) {
+module.exports.list = function (req, group, done) {
     var client = req.app.locals.redis
 
-    var hash = '/api/services/' + campaign
-
-    // Sort in ascending order
-    client.sort('/api/services/' + campaign, 'ALPHA', function (err, list) {
+    // Get all services for a group
+    this.detailList(req, group, function (err, list) {
         if (err) {
-            done(util.getMessage(500, 'Internal Server Error'))
+            done(util.getMessage(500, 'Internal Server Error'), null)
 
         } else if (list.length > 0) {
             // Return services list
-            done(util.getMessage(200, JSON.stringify(list)))
+            done(null, util.getMessage(200, JSON.stringify(list)))
 
         } else {
-            done(util.getMessage(404, 'Empty list'))
+            done(util.getMessage(404, 'Empty list'), null)
 
+        }
+    })
+}
+
+
+/**
+ * 
+ * Return all services for a group
+ * 
+ * @param {object} req
+ * @param {string} group
+ * @param {function} callback
+ */
+module.exports.detailList = function (req, group, done) {
+    var client = req.app.locals.redis
+
+    var servicesList = []
+
+    client.sort('/api/groups', 'ALPHA', function (err, groups) {
+        if (err || groups.length == 0) {
+            done(err, servicesList)
+
+        } else {
+            // Groups list
+            groups.forEach(function (reply, i) {
+                client.sort('/api/campaigns/' + reply, 'ALPHA', function (err, campaigns) {
+                    if (err || campaigns.length == 0) {
+                        done(err, servicesList)
+
+                    } else {
+                        // Campaign list for a groups
+                        campaigns.forEach(function (reply, j) {
+                            client.sort('/api/services/' + reply, 'ALPHA', function (err, services) {
+                                if (err || services.length == 0) {
+                                    done(util.getMessage(500, 'Internal Server Error'), servicesList)
+
+                                } else {
+                                    // Services list for a campaign
+                                    services.forEach(function (reply, k) {
+                                        // Get service details
+                                        client.hgetall(reply, function (err, currentService) {
+                                            if (err) {
+                                                done(util.getMessage(500, 'Internal Server Error'), servicesList)
+
+                                            } else if (currentService == null || currentService == undefined) {
+                                                done(util.getMessage(404, 'Service not found'))
+
+                                            } else {
+                                                if (group == 'all' || group == currentService.group) {
+                                                    servicesList.push(currentService)
+                                                }
+                                                if (i == (groups.length - 1) && j == (campaigns.length - 1) && k == (services.length - 1)) {
+                                                    done(null, servicesList)
+
+                                                }
+                                            }
+                                        })
+                                    })
+                                }
+                            })
+                        })
+                    }
+                })
+            })
         }
     })
 }

@@ -118,16 +118,16 @@ paths:
           description: "Empty list"
           schema:
            "$ref": "#/definitions/Message"
-  /services/{campaign}:
+  /services/{group}:
     get:
       description: "List of services"
       parameters:
-        - name: campaign
+        - name: group
           in: path
           required: true
-          description: "Name of campaign"
+          description: "Name of group"
           type: string
-          default: "mock"      
+          default: "imock"      
       responses:
         200:
           description: "List of services"
@@ -462,7 +462,7 @@ definitions:
         description: "Response name"
         type: array
         items:
-          type: string
+          type: object
   GroupList:
     type: object
     properties:

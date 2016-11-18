@@ -633,7 +633,7 @@ describe(
         describe(
             "17.c - List of services",
             function () {
-                var request = '/api/services/mock'
+                var request = '/api/services/imock'
                 before(function (done) {
                     chai.request(server).get(request).set('content-type', 'application/json; charset=UTF-8')
                         .end(function (err, res) {
@@ -645,7 +645,8 @@ describe(
                     response.should.be.ok
                     response.should.have.status(200)
                     response.should.be.json
-                    response.body[0].should.equal('/mock/INBound/OUTBound/REST_GET')
+                    response.body[0].should.have.property('path')
+                    response.body[0].path.should.equal('/INBound/OUTBound/REST_GET')
                 })
             })
 
@@ -735,7 +736,7 @@ describe(
         describe(
             "19.b - Import datasets",
             function () {
-                var url = '/api/tools/import?filter={"data":"^00_.*\.(yaml)$"}'
+                var url = '/api/tools/import?filter={"data":"^\\\\d\\\\d_.*\.(yaml)$"}'
                 before(function (done) {
                     chai.request(server).post(url).set('content-type', 'application/json; charset=UTF-8').send().end(function (err, res) {
                         response = res

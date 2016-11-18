@@ -60,15 +60,14 @@ router.delete('/', function (req, res, next) {
     }
 })
 
-// Return service details or list of services
+// Return services details
 router.get('/', function (req, res, next) {
     var locals = res.locals
-    var campaign = req.baseUrl.match(/\/api\/services?\/(.*)/)[1]
+    var filter = req.baseUrl.match(/\/api\/services?\/(.*)/)[1]
 
-    // Service details or list of services
     if (req.query.path != null && req.query.path != undefined) {
-        // Get detail service (path, group, attribut, ...)
-        services.detail(req, campaign, function (reply) {
+        // One service
+        services.detail(req, filter, function (err, reply) {
             if (reply.status == 200) {
                 locals.status = 200
                 locals.payload = reply.message
@@ -79,14 +78,14 @@ router.get('/', function (req, res, next) {
         })
 
     } else {
-        // Get list of services
-        services.list(req, campaign, function (reply) {
-            if (reply.status == 200) {
+        // All services details for a group
+        services.list(req, filter, function (err, reply) {
+            if (err) {
+                return next(err)
+            } else {
                 locals.status = 200
                 locals.payload = reply.message
                 next()
-            } else {
-                return next(reply)
             }
         })
     }
