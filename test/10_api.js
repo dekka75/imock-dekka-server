@@ -611,7 +611,7 @@ describe(
 
         // List of campaigns for a group
         describe(
-            "17.b - List of campaigns",
+            "17.b - List of campaigns for a group",
             function () {
                 var request = '/api/campaigns/imock'
                 before(function (done) {
@@ -650,9 +650,9 @@ describe(
                 })
             })
 
-        // List of responses
+        // List of responses for a service
         describe(
-            "17.d - List of responses",
+            "17.d - List of responses for a service",
             function () {
                 var request = '/api/responses/mock?path={"path":"/INBound/OUTBound/SOAP"}'
                 before(function (done) {
@@ -691,7 +691,7 @@ describe(
                 })
             })
 
-        // Response informations
+        // Response details
         describe(
             "18.b - Response details",
             function () {

@@ -21,6 +21,7 @@ var services = require('./routes/services')
 var responses = require('./routes/responses')
 var tools = require('./routes/tools')
 var routes = require('./routes/imock')
+var rrp = require('./routes/rrp')
 
 // Redis access
 app.locals.redis = redis.createClient('6379', 'redis')
@@ -56,6 +57,7 @@ app.use(/\/api\/groups/, groups)
 app.use(/\/api\/campaigns\/.*/, campaigns)
 app.use(/\/api\/services?\/.*/, services)
 app.use(/\/api\/responses?\/.*/, responses)
+app.use(/\/api\/rrps?\/.*/, rrp)
 app.use(/\/api\/tools\/.*/, tools)
 
 // Campaign - InBound - OutBound - Service

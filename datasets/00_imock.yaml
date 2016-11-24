@@ -7,6 +7,7 @@ infos:
 services:
   # REST_GET
   - path: "/INBound/OUTBound/REST_GET"
+    name: 'REST_GET'
     attribut: "id"
     contentType: "application/json; charset=UTF-8"
     status: 200
@@ -23,6 +24,7 @@ services:
 
   # REST_POST
   - path: "/INBound/OUTBound/REST_POST"
+    name: 'REST_POST'
     attribut: "credential.id"
     contentType: "application/json; charset=UTF-8"
     status: 200
@@ -39,6 +41,7 @@ services:
 
   # SOAP
   - path: "/INBound/OUTBound/SOAP"
+    name: 'SOAP'
     attribut: "id"
     contentType: "text/xml; charset=UTF-8"
     status: 200

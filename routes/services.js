@@ -63,7 +63,7 @@ router.delete('/', function (req, res, next) {
 // Return services details
 router.get('/', function (req, res, next) {
     var locals = res.locals
-    var filter = req.baseUrl.match(/\/api\/services?\/(.*)/)[1]
+    var filter = req.baseUrl.match(/\/api\/services?\/(.*)/)[1] // (.*) => group or campaign
 
     if (req.query.path != null && req.query.path != undefined) {
         // One service
@@ -78,7 +78,7 @@ router.get('/', function (req, res, next) {
         })
 
     } else {
-        // All services details for a group
+        // All services details for all group or a group
         services.list(req, filter, function (err, reply) {
             if (err) {
                 return next(err)

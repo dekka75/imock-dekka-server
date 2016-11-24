@@ -7,15 +7,18 @@ infos:
 services:
   # Real REST_GET
   - path: "/INBound/OUTBound/REST_GET"
+    name: 'REST_GET'
     real: 1
     producer: "http://192.168.56.102:8080/mock"
 
   # Real REST_POST
   - path: "/INBound/OUTBound/REST_POST"
+    name: 'REST_POST'
     real: 1
     producer: "http://192.168.56.102:8080/mock"
 
   # Real SOAP
   - path: "/INBound/OUTBound/SOAP"
+    name: 'SOAP'
     real: 1
     producer: "http://192.168.56.102:8080/mock"

@@ -20,6 +20,7 @@ module.exports.create = function (req, campaign, data, done) {
     var service = {
         campaign: (campaign != null && campaign != undefined) ? campaign : 'default',
         path: (data.path != null && data.path != undefined) ? data.path : '/INBound/OUTBound/default',
+        name: (data.name != null && data.name != undefined) ? data.name : 'unknow',
         designation: (data.designation != null && data.designation != undefined) ? data.designation : 'foo',
         group: (data.group != null && data.group != undefined) ? data.group : 'others',
         attribut: (data.attribut != null && data.attribut != undefined) ? data.attribut : 'no',
@@ -97,6 +98,7 @@ module.exports.modify = function (req, campaign, data, done) {
             service = {
                 campaign: campaign,
                 path: data.path,
+                name: (data.name != null && data.name != undefined) ? data.name : currentService.name,
                 designation: (data.designation != null && data.designation != undefined) ? data.designation : currentService.designation,
                 group: (data.group != null && data.group != undefined) ? data.group : currentService.group,
                 attribut: (data.attribut != null && data.attribut != undefined) ? data.attribut : currentService.attribut,
