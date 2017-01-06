@@ -36,8 +36,8 @@ describe(
                     response.should.be.ok
                     response.should.have.status(200)
                     response.should.be.json
-                    response.body[0].should.have.property('campaign')
-                    response.body[0].campaign.should.equal('mock')
+                    response.body[0].should.have.property('group')
+                    response.body[0].group.should.equal('imock')
 
                 })
             })

@@ -109,16 +109,16 @@ module.exports.detailList = function (req, group, done) {
                                                 rrp.forEach(function (reply, l) {
 
                                                     // Get Request response pairs details
-                                                    client.hgetall(reply, function (err, cuurentRrp) {
+                                                    client.hgetall(reply, function (err, currentRrp) {
                                                         if (err) {
                                                             done(util.getMessage(500, 'Internal Server Error'), rrpList)
 
-                                                        } else if (cuurentRrp == null || cuurentRrp == undefined) {
+                                                        } else if (currentRrp == null || currentRrp == undefined) {
                                                             done(util.getMessage(404, 'Request response pairs not found'))
 
                                                         } else {
-                                                            if (group == 'all' || group == cuurentRrp.group) {
-                                                                rrpList.push(cuurentRrp)
+                                                            if (group == 'all' || group == currentRrp.group) {
+                                                                rrpList.push(currentRrp)
                                                             }
                                                             if (i == (groups.length - 1) && j == (campaigns.length - 1) && k == (services.length - 1) && l == (rrp.length - 1)) {
                                                                 done(null, rrpList)

@@ -3,7 +3,7 @@
     "version": "0.1.0",
     "private": true,
     "scripts": {
-        "start": "if [ '$NODE_ENV' == 'production' ]; then node ./bin/www; else nodemon --debug-brk=5858 ./bin/www; fi"
+        "start": "if [ '$NODE_ENV' != 'production' ]; then node ./bin/www; else nodemon --debug-brk=5858 ./bin/www; fi"
     },
     "dependencies": {
         "body-parser": "~1.15.1",

@@ -243,6 +243,7 @@ function sendBody(client, mode, req, res, service, body, mess) {
  * @returns {Object}
  */
 function getRequestResponsePair(mode, beginAt, req, res, service, resBody) {
+    var group = ''
     var campaign = ''
     var path = ''
     var url = ''
@@ -253,12 +254,19 @@ function getRequestResponsePair(mode, beginAt, req, res, service, resBody) {
     var consumers = req.get('host').match('/^https?:\/\//') ? req.get('host') : 'http://' + req.get('host')
     var producer = ''
     var reqBody = ''
+
+    var rrp = {}
     try {
         campaign = req.baseUrl.match(/\/([A-Z-a-z-0-9-_]{3,})\/.*/)[1]
         url = req.baseUrl.match(/\/[A-Z-a-z-0-9-_]{3,}(\/.*)/)[1]
         query = req.originalUrl.match(/\/[A-Z-a-z-0-9-_]{3,}\/[A-Z-a-z-0-9-_]{3,}\/[A-Z-a-z-0-9-_]{3,}\/.*\?(.*)/)[1]
-    } catch (e) {}
+
+    } catch (e) {
+        // TODO: Manage error
+    }
+
     if (service != null && service != undefined) {
+        group = service.group
         path = url + '/' + uid
         if (service.producer != null && service.producer != undefined) {
             producer = service.producer
@@ -266,6 +274,7 @@ function getRequestResponsePair(mode, beginAt, req, res, service, resBody) {
     } else {
         path = '/NoServiceFound/' + uid
     }
+
     if (JSON.stringify(req.body) != '{}') {
         // TODO: dont take content-type from request
         if (/application\/json/.test(req.get('content-type'))) {
@@ -274,8 +283,10 @@ function getRequestResponsePair(mode, beginAt, req, res, service, resBody) {
             reqBody = req.rawBody
         }
     }
+
     // Response - request pair
     var rrp = {
+        group: group,
         campaign: campaign,
         path: path,
         mode: mode,
@@ -297,6 +308,7 @@ function getRequestResponsePair(mode, beginAt, req, res, service, resBody) {
         stop: endAt.toString(),
         duration: duration
     }
+
     return rrp
 }
 
